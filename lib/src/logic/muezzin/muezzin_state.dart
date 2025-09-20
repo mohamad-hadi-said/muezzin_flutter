@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:muezzin_flutter/src/model/azkar_model.dart';
+import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 
 part 'muezzin_state.freezed.dart';
 
@@ -9,9 +9,7 @@ abstract class MuezzinState with _$MuezzinState {
     @Default(false) bool loading,
     @Default(false) bool error,
     String? errorMessage,
-    @Default([]) List<MuezzinModel> azkar,
-    @Default(0) int currentCount,
-    MuezzinModel? currentZeker,
+    PrayerTimesData? prayerTimes,
     DateTime? dateTime,
   }) = _MuezzinState;
 

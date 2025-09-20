@@ -1,4 +1,4 @@
-import 'package:muezzin_flutter/core/theme/azkar_theme.dart';
+import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/toast.dart';
 import 'package:muezzin_flutter/src/logic/home/home_bloc.dart';
 import 'package:muezzin_flutter/src/logic/home/home_state.dart';

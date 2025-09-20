@@ -1,27 +1,22 @@
-import 'package:muezzin_flutter/core/theme/azkar_theme.dart';
-import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
-import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
-import 'package:muezzin_flutter/src/view/widgets/dimond_background.dart';
+// ignore_for_file: unused_element
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
+import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
+import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
 
 class MuezzinScreen extends StatefulWidget {
   const MuezzinScreen({super.key});
-
 
   @override
   State<MuezzinScreen> createState() => _MuezzinScreenState();
 }
 
 class _MuezzinScreenState extends State<MuezzinScreen> {
-  late MuezzinBloc bloc;
-
-
+  MuezzinBloc bloc = MuezzinBloc();
   @override
   void initState() {
     super.initState();
-    bloc = MuezzinBloc();
-    // Load azkar on screen start
     bloc.add(LoadMuezzin());
   }
 
@@ -33,117 +28,449 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "",
-            style: TextStyle(
-              color: MuezzinTheme.textPrimary,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return BlocBuilder<MuezzinBloc, MuezzinState>(
+      bloc: bloc,
+      builder: (context, state) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            appBar: null,
+            body: Container(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    MuezzinTheme.gradientTop,
+                    MuezzinTheme.gradientBottom,
+                  ],
+                ),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: _PrayerTimesContent(state: state),
+              ),
             ),
+            bottomNavigationBar: const _BottomActionsBar(),
           ),
-          centerTitle: true,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: MuezzinTheme.textPrimary,
-            ),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
+        );
+      },
+    );
+  }
+}
+
+// ======================== Prayer Times UI ========================
+class _PrayerTimesContent extends StatelessWidget {
+  final MuezzinState state;
+  const _PrayerTimesContent({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [_HeaderCard(state: state)],
+    );
+  }
+}
+
+class _HeaderCard extends StatelessWidget {
+  final MuezzinState state;
+  const _HeaderCard({required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    // We compute the clock here to ensure fresh time per build
+    final now = DateTime.now();
+    final clock = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+    final timings = state.prayerTimes?.timings;
+    final meta = state.prayerTimes?.meta;
+    final date = state.prayerTimes?.date;
+    final tz = meta?.timezone ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [MuezzinTheme.gradientTop, MuezzinTheme.secondaryColor],
         ),
-        body: SafeArea(
-          child: Stack(
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: const [
+              _RoundIcon(icon: Icons.settings_outlined),
+              Expanded(child: Center(child: _TitleWithIcon())),
+              _RoundIcon(icon: Icons.menu_rounded),
+            ],
+          ),
+          /* const SizedBox(height: 12),
+          Row(
             children: [
-              const Positioned.fill(child: DiamondBackground()),
-              BlocBuilder<MuezzinBloc, MuezzinState>(
-                bloc: bloc,
-                builder: (context, state) {
-                  if (state.loading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state.error) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(state.errorMessage ?? 'حدث خطأ غير متوقع'),
-                      ),
-                    );
-                  }
-
-                  final current = state.currentZeker;
-                  if (current == null) {
-                    return const Center(child: Text('لا توجد أذكار حالياً'));
-                  }
-
-                  final repetitions = (current.repetitions ?? 1);
-                  final currentCount = state.currentCount;
-                  final total = state.azkar.isEmpty ? 1 : state.azkar.length;
-                  final idx = state.azkar.indexOf(current);
-                  final progress = total == 0
-                      ? 0.0
-                      : ((idx + 1) / total).clamp(0.0, 1.0);
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    child: Column(
-                      children: [
-                        // Card + overlapping repeat bar section
-                        _CardWithRepeat(
-                          text: current.text ?? '',
-                          count: currentCount,
-                          max: repetitions,
-                          onMinus: () => bloc.add(const DecrementCount()),
-                          onPlus: () => bloc.add(const IncrementCount()),
-                          onReset: () => bloc.add(const ResetCurrent()),
-                        ),
-                        const Spacer(),
-                        _ProgressBar(value: progress),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => bloc.add(const PrevMuezzin()),
-                              icon: Icon(
-                                Icons.double_arrow_rounded,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              iconSize: 26,
-                              tooltip: 'السابق',
-                            ),
-                            SizedBox(width: 16),
-                            Expanded(
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  shape: const StadiumBorder(),
-                                  elevation: 0,
-                                ),
-                                onPressed: () => bloc.add(const NextMuezzin()),
-                                child: const Text('التالي'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              Expanded(
+                child: _InfoChip(
+                  icon: Icons.location_on_outlined,
+                  text: tz.isNotEmpty ? tz : '—',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _InfoChip(
+                  icon: Icons.place_outlined,
+                  text: '${meta?.latitude?.toStringAsFixed(3) ?? '--'}, ${meta?.longitude?.toStringAsFixed(3) ?? '--'}',
+                ),
+              ),
+            ],
+          ), */
+          const SizedBox(height: 24),
+          // Big digital clock
+          Text(
+            clock,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: MuezzinTheme.onPrimary,
+              fontSize: 46,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 4,
+              height: 1.0,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: _DateChip(
+                  icon: Icons.event_note_outlined,
+                  text: date?.readable ?? '—',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _DateChip(
+                  icon: Icons.event_outlined,
+                  text: '${date?.hijri?.date ?? '—'} هـ',
+                ),
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          // Prayer tiles
+          _PrayerTile(
+            name: 'الفجر',
+            timeText: timings?.fajr ?? '--:--',
+            icon: Icons.wb_twilight,
+          ),
+          const SizedBox(height: 12),
+          _PrayerTile(
+            name: 'الشروق',
+            timeText: timings?.sunrise ?? '--:--',
+            icon: Icons.wb_sunny,
+          ),
+          const SizedBox(height: 12),
+          _PrayerTile(
+            name: 'الظهر',
+            timeText: timings?.dhuhr ?? '--:--',
+            icon: Icons.wb_sunny_outlined,
+          ),
+          const SizedBox(height: 12),
+          _PrayerTile(
+            name: 'العصر',
+            timeText: timings?.asr ?? '--:--',
+            icon: Icons.location_city_outlined,
+          ),
+          const SizedBox(height: 12),
+          _PrayerTile(
+            name: 'المغرب',
+            timeText: timings?.maghrib ?? '--:--',
+            icon: Icons.nightlight,
+          ),
+          const SizedBox(height: 12),
+          _PrayerTile(
+            name: 'العشاء',
+            timeText: timings?.isha ?? '--:--',
+            icon: Icons.nightlight_round,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoundIcon extends StatelessWidget {
+  final IconData icon;
+  const _RoundIcon({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        color: MuezzinTheme.onPrimary.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(icon, color: MuezzinTheme.onPrimary),
+    );
+  }
+}
+
+class _TitleWithIcon extends StatelessWidget {
+  const _TitleWithIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: const [
+        Text(
+          'مواقيت الصلاة',
+          style: TextStyle(
+            color: MuezzinTheme.onPrimary,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        SizedBox(width: 6),
+        Icon(Icons.alarm, color: MuezzinTheme.onPrimary, size: 18),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _InfoChip({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: MuezzinTheme.onPrimary.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: MuezzinTheme.onPrimary, size: 18),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: MuezzinTheme.onPrimary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateChip extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  const _DateChip({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: MuezzinTheme.onPrimary.withOpacity(0.25),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: MuezzinTheme.onPrimary, size: 18),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: MuezzinTheme.onPrimary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PrayerTile extends StatelessWidget {
+  final String name;
+  final String timeText; // already Arabic digits
+  final IconData icon;
+  final bool isNext;
+  final String? subtitle;
+  const _PrayerTile({
+    required this.name,
+    required this.timeText,
+    required this.icon,
+    this.isNext = false,
+    this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: MuezzinTheme.onPrimary.withOpacity(0.25),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: Row(
+            children: [
+              // Right side: label + icon square
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: MuezzinTheme.onPrimary.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: MuezzinTheme.onPrimary),
+                  ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          color: MuezzinTheme.onPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                      if (isNext && subtitle != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          subtitle!,
+                          style: TextStyle(
+                            color: MuezzinTheme.onPrimary.withOpacity(0.9),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+              const Spacer(),
+              // Left side: time
+              Text(
+                timeText,
+                style: const TextStyle(
+                  color: MuezzinTheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              
+            ],
+          ),
+        ),
+        if (isNext)
+          Positioned(
+            right: 6,
+            top: 8,
+            bottom: 8,
+            child: Container(
+              width: 6,
+              decoration: BoxDecoration(
+                color: MuezzinTheme.goldColor.withOpacity(0.9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _BottomActionsBar extends StatelessWidget {
+  const _BottomActionsBar();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget item(IconData icon, String label) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: MuezzinTheme.onPrimary.withOpacity(0.25),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(icon, color: MuezzinTheme.onPrimary),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(color: MuezzinTheme.onPrimary, fontSize: 12),
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [MuezzinTheme.secondaryColor, MuezzinTheme.gradientBottom],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            item(Icons.explore_outlined, 'القبلة'),
+            item(Icons.timer_outlined, 'العد التنازلي'),
+            item(Icons.place_outlined, 'الموقع'),
+          ],
         ),
       ),
     );
   }
 }
+
 
 // Combines the card and the repeat bar with a slight overlap like the screenshot
 class _CardWithRepeat extends StatelessWidget {

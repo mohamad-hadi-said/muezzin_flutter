@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:muezzin_flutter/src/model/azkar_model.dart';
+import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// AppCache is a singleton class that provides a centralized way to store and retrieve
@@ -13,7 +13,7 @@ class AppCache {
   static const String _userKey = 'user_data';
   static const String _isLoggedInKey = 'is_logged_in';
   static const String _userScoreKey = 'user_score';
-  static const String _azkarKey = 'azkar';
+  static const String _prayerTimesKey = 'prayer_times';
   static const String _adPointsKey = 'ad_points';
   static const String _timesPlayedKey = 'times_played';
   static const String _bestWinKey = 'best_win';
@@ -200,20 +200,20 @@ class AppCache {
     return _prefs.getInt(_userScoreKey) ?? 0;
   }
 
-  Future<bool> saveMuezzin(List<MuezzinModel> azkar) async {
+  Future<bool> savePrayerTimes(List<PrayerTimesData> prayerTimes) async {
     _checkInitialized();
-    return await _prefs.setStringList(_azkarKey, azkar.map((question) =>jsonEncode(question.toJson())).toList());
+    return await _prefs.setStringList(_prayerTimesKey, prayerTimes.map((question) =>jsonEncode(question.toJson())).toList());
   }
 
-  List<MuezzinModel> getMuezzin() {
+  List<PrayerTimesData> getPrayerTimes() {
     _checkInitialized();
-    final azkarStringList = _prefs.getStringList(_azkarKey);
-    if (azkarStringList == null) return [];
+    final prayerTimesStringList = _prefs.getStringList(_prayerTimesKey);
+    if (prayerTimesStringList == null) return [];
     
     try {
-      return azkarStringList.map((questionString) => MuezzinModel.fromJson(jsonDecode(questionString))).toList();
+      return prayerTimesStringList.map((questionString) => PrayerTimesData.fromJson(jsonDecode(questionString))).toList();
     } catch (e) {
-      debugPrint('Error decoding azkar: $e');
+      debugPrint('Error decoding prayer times: $e');
       return [];
     }
   }

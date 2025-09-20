@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import 'muezzin_theme.dart';
 
 class AppTextTheme {
   static TextTheme get lightTextTheme {
@@ -7,71 +7,71 @@ class AppTextTheme {
       displayLarge: TextStyle(
         fontSize: 32,
         fontWeight: FontWeight.bold,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
         letterSpacing: -0.5,
       ),
       displayMedium: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.bold,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
         letterSpacing: -0.5,
       ),
       displaySmall: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.bold,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
       ),
       headlineMedium: TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w600,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
       ),
       headlineSmall: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
       ),
       titleLarge: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: AppColors.onBackground,
+        color: MuezzinTheme.onBackground,
       ),
       titleMedium: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w500,
-        color: AppColors.onBackground.withOpacity(0.8),
+        color: MuezzinTheme.onBackground.withOpacity(0.8),
       ),
       titleSmall: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: AppColors.onBackground.withOpacity(0.7),
+        color: MuezzinTheme.onBackground.withOpacity(0.7),
         letterSpacing: 0.1,
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.normal,
-        color: AppColors.onBackground.withOpacity(0.8),
+        color: MuezzinTheme.onBackground.withOpacity(0.8),
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.normal,
-        color: AppColors.onBackground.withOpacity(0.7),
+        color: MuezzinTheme.onBackground.withOpacity(0.7),
       ),
       labelLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: AppColors.onPrimary,
+        color: MuezzinTheme.onPrimary,
         letterSpacing: 0.5,
       ),
       bodySmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.normal,
-        color: AppColors.onBackground.withOpacity(0.6),
+        color: MuezzinTheme.onBackground.withOpacity(0.6),
       ),
       labelSmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: AppColors.onBackground.withOpacity(0.6),
+        color: MuezzinTheme.onBackground.withOpacity(0.6),
         letterSpacing: 0.2,
       ),
     );

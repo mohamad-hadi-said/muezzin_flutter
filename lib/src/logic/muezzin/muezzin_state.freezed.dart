@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MuezzinState {
 
- bool get loading; bool get error; String? get errorMessage; List<MuezzinModel> get azkar; int get currentCount; MuezzinModel? get currentZeker; DateTime? get dateTime;
+ bool get loading; bool get error; String? get errorMessage; PrayerTimesData? get prayerTimes; DateTime? get dateTime;
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MuezzinStateCopyWith<MuezzinState> get copyWith => _$MuezzinStateCopyWithImpl<M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other.azkar, azkar)&&(identical(other.currentCount, currentCount) || other.currentCount == currentCount)&&(identical(other.currentZeker, currentZeker) || other.currentZeker == currentZeker)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,const DeepCollectionEquality().hash(azkar),currentCount,currentZeker,dateTime);
+int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime);
 
 @override
 String toString() {
-  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, azkar: $azkar, currentCount: $currentCount, currentZeker: $currentZeker, dateTime: $dateTime)';
+  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MuezzinStateCopyWith<$Res>  {
   factory $MuezzinStateCopyWith(MuezzinState value, $Res Function(MuezzinState) _then) = _$MuezzinStateCopyWithImpl;
 @useResult
 $Res call({
- bool loading, bool error, String? errorMessage, List<MuezzinModel> azkar, int currentCount, MuezzinModel? currentZeker, DateTime? dateTime
+ bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime
 });
 
 
@@ -62,15 +62,13 @@ class _$MuezzinStateCopyWithImpl<$Res>
 
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? azkar = null,Object? currentCount = null,Object? currentZeker = freezed,Object? dateTime = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,}) {
   return _then(_self.copyWith(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,azkar: null == azkar ? _self.azkar : azkar // ignore: cast_nullable_to_non_nullable
-as List<MuezzinModel>,currentCount: null == currentCount ? _self.currentCount : currentCount // ignore: cast_nullable_to_non_nullable
-as int,currentZeker: freezed == currentZeker ? _self.currentZeker : currentZeker // ignore: cast_nullable_to_non_nullable
-as MuezzinModel?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
+as String?,prayerTimes: freezed == prayerTimes ? _self.prayerTimes : prayerTimes // ignore: cast_nullable_to_non_nullable
+as PrayerTimesData?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }
@@ -156,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  List<MuezzinModel> azkar,  int currentCount,  MuezzinModel? currentZeker,  DateTime? dateTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MuezzinState() when $default != null:
-return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.currentCount,_that.currentZeker,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
   return orElse();
 
 }
@@ -177,10 +175,10 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  List<MuezzinModel> azkar,  int currentCount,  MuezzinModel? currentZeker,  DateTime? dateTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)  $default,) {final _that = this;
 switch (_that) {
 case _MuezzinState():
-return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.currentCount,_that.currentZeker,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -197,10 +195,10 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.c
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loading,  bool error,  String? errorMessage,  List<MuezzinModel> azkar,  int currentCount,  MuezzinModel? currentZeker,  DateTime? dateTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)?  $default,) {final _that = this;
 switch (_that) {
 case _MuezzinState() when $default != null:
-return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.currentCount,_that.currentZeker,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
   return null;
 
 }
@@ -212,21 +210,13 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.azkar,_that.c
 
 
 class _MuezzinState implements MuezzinState {
-   _MuezzinState({this.loading = false, this.error = false, this.errorMessage, final  List<MuezzinModel> azkar = const [], this.currentCount = 0, this.currentZeker, this.dateTime}): _azkar = azkar;
+   _MuezzinState({this.loading = false, this.error = false, this.errorMessage, this.prayerTimes, this.dateTime});
   
 
 @override@JsonKey() final  bool loading;
 @override@JsonKey() final  bool error;
 @override final  String? errorMessage;
- final  List<MuezzinModel> _azkar;
-@override@JsonKey() List<MuezzinModel> get azkar {
-  if (_azkar is EqualUnmodifiableListView) return _azkar;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_azkar);
-}
-
-@override@JsonKey() final  int currentCount;
-@override final  MuezzinModel? currentZeker;
+@override final  PrayerTimesData? prayerTimes;
 @override final  DateTime? dateTime;
 
 /// Create a copy of MuezzinState
@@ -239,16 +229,16 @@ _$MuezzinStateCopyWith<_MuezzinState> get copyWith => __$MuezzinStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&const DeepCollectionEquality().equals(other._azkar, _azkar)&&(identical(other.currentCount, currentCount) || other.currentCount == currentCount)&&(identical(other.currentZeker, currentZeker) || other.currentZeker == currentZeker)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,const DeepCollectionEquality().hash(_azkar),currentCount,currentZeker,dateTime);
+int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime);
 
 @override
 String toString() {
-  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, azkar: $azkar, currentCount: $currentCount, currentZeker: $currentZeker, dateTime: $dateTime)';
+  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime)';
 }
 
 
@@ -259,7 +249,7 @@ abstract mixin class _$MuezzinStateCopyWith<$Res> implements $MuezzinStateCopyWi
   factory _$MuezzinStateCopyWith(_MuezzinState value, $Res Function(_MuezzinState) _then) = __$MuezzinStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool loading, bool error, String? errorMessage, List<MuezzinModel> azkar, int currentCount, MuezzinModel? currentZeker, DateTime? dateTime
+ bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime
 });
 
 
@@ -276,15 +266,13 @@ class __$MuezzinStateCopyWithImpl<$Res>
 
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? azkar = null,Object? currentCount = null,Object? currentZeker = freezed,Object? dateTime = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,}) {
   return _then(_MuezzinState(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String?,azkar: null == azkar ? _self._azkar : azkar // ignore: cast_nullable_to_non_nullable
-as List<MuezzinModel>,currentCount: null == currentCount ? _self.currentCount : currentCount // ignore: cast_nullable_to_non_nullable
-as int,currentZeker: freezed == currentZeker ? _self.currentZeker : currentZeker // ignore: cast_nullable_to_non_nullable
-as MuezzinModel?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
+as String?,prayerTimes: freezed == prayerTimes ? _self.prayerTimes : prayerTimes // ignore: cast_nullable_to_non_nullable
+as PrayerTimesData?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
 as DateTime?,
   ));
 }

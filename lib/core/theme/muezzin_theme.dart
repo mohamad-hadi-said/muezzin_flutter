@@ -2,21 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:muezzin_flutter/core/theme/app_text_theme.dart';
 
 class MuezzinTheme {
-  // Colors - Updated based on the uploaded design
-  static const Color primaryColor = Color(0xFF5B9BD5); // Blue from the button
-  static const Color secondaryColor = Color(0xFF4A90E2); // Lighter blue variant
-  static const Color backgroundColor = Color(0xFFF5F5F5); // Light gray background
-  static const Color cardColor = Color(0xFFFFFFFF); // White cards
-  static const Color primaryBackground = Color(0xFFF8F8F8); // Very light background
-  static const Color secondaryBackground = Color(0xFFEFEFEF); // Light gray variant
-  static const Color accentColor = Color(0xFF5B9BD5); // Same as primary
-  static const Color goldColor = Color(0xFFD4AF37); // Subtle gold
-  static const Color textPrimary = Color(0xFF2C3E50); // Dark text for readability
-  static const Color textSecondary = Color(0xFF7F8C8D); // Gray text
-  static const Color disabledColor = Color(0xFFBDC3C7); // Light gray for disabled
-  static const Color errorColor = Color(0xFFE74C3C); // Soft red
-  static const Color successColor = Color(0xFF27AE60); // Soft green
-  static const Color outlineColor = Color(0xFFE0E0E0); // Light border
+  // Palette inspired by the provided screenshot (soft sky-blue gradient UI)
+  // Base brand colors
+  static const Color primaryColor = Color(0xFF6FAEFF); // Main sky blue
+  static const Color secondaryColor = Color(0xFFA5C9FF); // Lighter blue accent
+
+  // Gradient background (used by screens with custom backgrounds)
+  static const Color gradientTop = Color(0xFFBFE9FF);
+  static const Color gradientBottom = Color(0xFF6FAEFF);
+
+  // Surfaces and backgrounds
+  static const Color backgroundColor = Color(0xFFE9F4FF); // Fallback scaffold bg
+  static const Color cardColor = Color(0xFFFFFFFF); // Elevated cards
+  static const Color primaryBackground = Color(0xFFEFF6FF);
+  static const Color secondaryBackground = Color(0xFFDDEBFF);
+
+  // Content colors
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color onBackground = Color(0xFF23425F); // Deep bluish for text
+  static const Color textPrimary = onBackground;
+  static const Color textSecondary = Color(0xFF6D86A1);
+
+  // Accents and states
+  static const Color accentColor = primaryColor;
+  static const Color goldColor = Color(0xFFD7B86A); // Gold bar highlight
+  static const Color disabledColor = Color(0xFFB8C7DA);
+  static const Color errorColor = Color(0xFFE74C3C);
+  static const Color successColor = Color(0xFF27AE60);
+  static const Color outlineColor = Color(0xFFE0E6EF);
 
   
   // Theme Data - Merged from both themes
@@ -33,27 +46,28 @@ class MuezzinTheme {
         background: backgroundColor,
         surface: cardColor,
         error: errorColor,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onBackground: textPrimary,
-        onSurface: textPrimary,
+        onPrimary: onPrimary,
+        onSecondary: onPrimary,
+        onBackground: onBackground,
+        onSurface: onBackground,
         outline: outlineColor,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: onBackground,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontSize: 24,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: onBackground,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -73,7 +87,7 @@ class MuezzinTheme {
       cardTheme: CardThemeData(
         color: cardColor,
         elevation: 1,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withOpacity(0.08),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -106,27 +120,28 @@ class MuezzinTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: primaryColor,
-      scaffoldBackgroundColor: const Color(0xFF1A1A1A),
+      scaffoldBackgroundColor: const Color(0xFF101621),
       fontFamily: 'Cairo',
       colorScheme: const ColorScheme.dark(
         primary: primaryColor,
         secondary: secondaryColor,
-        background: Color(0xFF1A1A1A),
-        surface: Color(0xFF2D2D2D),
+        background: Color(0xFF101621),
+        surface: Color(0xFF182234),
         error: errorColor,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
+        onPrimary: onPrimary,
+        onSecondary: onPrimary,
         onBackground: Colors.white,
         onSurface: Colors.white,
-        outline: Color(0xFF404040),
+        outline: Color(0xFF2C3A4E),
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         centerTitle: true,
         titleTextStyle: TextStyle(
-          fontSize: 24,
+          fontSize: 20,
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
@@ -134,7 +149,7 @@ class MuezzinTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          foregroundColor: onPrimary,
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),
@@ -152,7 +167,7 @@ class MuezzinTheme {
       ),
       textTheme: AppTextTheme.darkTextTheme,
       cardTheme: CardThemeData(
-        color: const Color(0xFF2D2D2D),
+        color: const Color(0xFF182234),
         elevation: 1,
         shadowColor: Colors.black.withOpacity(0.3),
         shape: RoundedRectangleBorder(
@@ -161,14 +176,14 @@ class MuezzinTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: const Color(0xFF2D2D2D),
+        fillColor: const Color(0xFF182234),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF404040)),
+          borderSide: const BorderSide(color: Color(0xFF2C3A4E)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFF404040)),
+          borderSide: const BorderSide(color: Color(0xFF2C3A4E)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),

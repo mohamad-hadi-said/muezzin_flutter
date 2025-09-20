@@ -1,4 +1,4 @@
-import 'package:muezzin_flutter/core/theme/azkar_theme.dart';
+import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
@@ -15,7 +15,7 @@ Future<void> main() async {
     await di.configureDependencies();
 
     // Initialize Supabase
-    SupabaseService();
+    // SupabaseService();
 
     // Initialize AppCache
     await AppCache.initializeCache();
@@ -174,4 +174,4 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
   Widget build(BuildContext context) => widget.child;
 }
 
-//https://aladhan.com/prayer-times-ap
+//https://aladhan.com/prayer-times-api
