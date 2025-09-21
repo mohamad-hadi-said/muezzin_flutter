@@ -11,6 +11,7 @@ abstract class MuezzinRemoteDataSource {
     required double longitude,
     int method = 3, // Muslim World League by default
     String? timezone,
+    bool iso8601 = false,
   });
 }
 
@@ -28,6 +29,7 @@ class MuezzinRemoteDataSourceImpl implements MuezzinRemoteDataSource {
     required double longitude,
     int method = 3,
     String? timezone,
+    bool iso8601 = false,
   }) async {
     try {
       final response = await _dio.get(
@@ -37,6 +39,7 @@ class MuezzinRemoteDataSourceImpl implements MuezzinRemoteDataSource {
           'longitude': longitude,
           'method': method,
           if (timezone != null) 'timezonestring': timezone,
+          'iso8601': iso8601,
         },
       );
 

@@ -14,7 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MuezzinState {
 
- bool get loading; bool get error; String? get errorMessage; PrayerTimesData? get prayerTimes; DateTime? get dateTime;
+ bool get loading; bool get error; String? get errorMessage; PrayerTimesData? get prayerTimes; DateTime? get dateTime;// Key of the next prayer among: fajr, sunrise, dhuhr, asr, maghrib, isha
+ String? get nextPrayerKey;// Exact next prayer time in local timezone
+ DateTime? get nextPrayerTime;// Remaining duration until next prayer
+ Duration? get timeUntilNext;
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +28,16 @@ $MuezzinStateCopyWith<MuezzinState> get copyWith => _$MuezzinStateCopyWithImpl<M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.nextPrayerKey, nextPrayerKey) || other.nextPrayerKey == nextPrayerKey)&&(identical(other.nextPrayerTime, nextPrayerTime) || other.nextPrayerTime == nextPrayerTime)&&(identical(other.timeUntilNext, timeUntilNext) || other.timeUntilNext == timeUntilNext));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime);
+int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime,nextPrayerKey,nextPrayerTime,timeUntilNext);
 
 @override
 String toString() {
-  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime)';
+  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime, nextPrayerKey: $nextPrayerKey, nextPrayerTime: $nextPrayerTime, timeUntilNext: $timeUntilNext)';
 }
 
 
@@ -45,7 +48,7 @@ abstract mixin class $MuezzinStateCopyWith<$Res>  {
   factory $MuezzinStateCopyWith(MuezzinState value, $Res Function(MuezzinState) _then) = _$MuezzinStateCopyWithImpl;
 @useResult
 $Res call({
- bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime
+ bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime, String? nextPrayerKey, DateTime? nextPrayerTime, Duration? timeUntilNext
 });
 
 
@@ -62,14 +65,17 @@ class _$MuezzinStateCopyWithImpl<$Res>
 
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,Object? nextPrayerKey = freezed,Object? nextPrayerTime = freezed,Object? timeUntilNext = freezed,}) {
   return _then(_self.copyWith(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,prayerTimes: freezed == prayerTimes ? _self.prayerTimes : prayerTimes // ignore: cast_nullable_to_non_nullable
 as PrayerTimesData?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,nextPrayerKey: freezed == nextPrayerKey ? _self.nextPrayerKey : nextPrayerKey // ignore: cast_nullable_to_non_nullable
+as String?,nextPrayerTime: freezed == nextPrayerTime ? _self.nextPrayerTime : nextPrayerTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,timeUntilNext: freezed == timeUntilNext ? _self.timeUntilNext : timeUntilNext // ignore: cast_nullable_to_non_nullable
+as Duration?,
   ));
 }
 
@@ -154,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime,  String? nextPrayerKey,  DateTime? nextPrayerTime,  Duration? timeUntilNext)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MuezzinState() when $default != null:
-return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime,_that.nextPrayerKey,_that.nextPrayerTime,_that.timeUntilNext);case _:
   return orElse();
 
 }
@@ -175,10 +181,10 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime,  String? nextPrayerKey,  DateTime? nextPrayerTime,  Duration? timeUntilNext)  $default,) {final _that = this;
 switch (_that) {
 case _MuezzinState():
-return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime,_that.nextPrayerKey,_that.nextPrayerTime,_that.timeUntilNext);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -195,10 +201,10 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool loading,  bool error,  String? errorMessage,  PrayerTimesData? prayerTimes,  DateTime? dateTime,  String? nextPrayerKey,  DateTime? nextPrayerTime,  Duration? timeUntilNext)?  $default,) {final _that = this;
 switch (_that) {
 case _MuezzinState() when $default != null:
-return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime);case _:
+return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_that.dateTime,_that.nextPrayerKey,_that.nextPrayerTime,_that.timeUntilNext);case _:
   return null;
 
 }
@@ -210,7 +216,7 @@ return $default(_that.loading,_that.error,_that.errorMessage,_that.prayerTimes,_
 
 
 class _MuezzinState implements MuezzinState {
-   _MuezzinState({this.loading = false, this.error = false, this.errorMessage, this.prayerTimes, this.dateTime});
+   _MuezzinState({this.loading = false, this.error = false, this.errorMessage, this.prayerTimes, this.dateTime, this.nextPrayerKey, this.nextPrayerTime, this.timeUntilNext});
   
 
 @override@JsonKey() final  bool loading;
@@ -218,6 +224,12 @@ class _MuezzinState implements MuezzinState {
 @override final  String? errorMessage;
 @override final  PrayerTimesData? prayerTimes;
 @override final  DateTime? dateTime;
+// Key of the next prayer among: fajr, sunrise, dhuhr, asr, maghrib, isha
+@override final  String? nextPrayerKey;
+// Exact next prayer time in local timezone
+@override final  DateTime? nextPrayerTime;
+// Remaining duration until next prayer
+@override final  Duration? timeUntilNext;
 
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
@@ -229,16 +241,16 @@ _$MuezzinStateCopyWith<_MuezzinState> get copyWith => __$MuezzinStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MuezzinState&&(identical(other.loading, loading) || other.loading == loading)&&(identical(other.error, error) || other.error == error)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.prayerTimes, prayerTimes) || other.prayerTimes == prayerTimes)&&(identical(other.dateTime, dateTime) || other.dateTime == dateTime)&&(identical(other.nextPrayerKey, nextPrayerKey) || other.nextPrayerKey == nextPrayerKey)&&(identical(other.nextPrayerTime, nextPrayerTime) || other.nextPrayerTime == nextPrayerTime)&&(identical(other.timeUntilNext, timeUntilNext) || other.timeUntilNext == timeUntilNext));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime);
+int get hashCode => Object.hash(runtimeType,loading,error,errorMessage,prayerTimes,dateTime,nextPrayerKey,nextPrayerTime,timeUntilNext);
 
 @override
 String toString() {
-  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime)';
+  return 'MuezzinState(loading: $loading, error: $error, errorMessage: $errorMessage, prayerTimes: $prayerTimes, dateTime: $dateTime, nextPrayerKey: $nextPrayerKey, nextPrayerTime: $nextPrayerTime, timeUntilNext: $timeUntilNext)';
 }
 
 
@@ -249,7 +261,7 @@ abstract mixin class _$MuezzinStateCopyWith<$Res> implements $MuezzinStateCopyWi
   factory _$MuezzinStateCopyWith(_MuezzinState value, $Res Function(_MuezzinState) _then) = __$MuezzinStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime
+ bool loading, bool error, String? errorMessage, PrayerTimesData? prayerTimes, DateTime? dateTime, String? nextPrayerKey, DateTime? nextPrayerTime, Duration? timeUntilNext
 });
 
 
@@ -266,14 +278,17 @@ class __$MuezzinStateCopyWithImpl<$Res>
 
 /// Create a copy of MuezzinState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? loading = null,Object? error = null,Object? errorMessage = freezed,Object? prayerTimes = freezed,Object? dateTime = freezed,Object? nextPrayerKey = freezed,Object? nextPrayerTime = freezed,Object? timeUntilNext = freezed,}) {
   return _then(_MuezzinState(
 loading: null == loading ? _self.loading : loading // ignore: cast_nullable_to_non_nullable
 as bool,error: null == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as bool,errorMessage: freezed == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String?,prayerTimes: freezed == prayerTimes ? _self.prayerTimes : prayerTimes // ignore: cast_nullable_to_non_nullable
 as PrayerTimesData?,dateTime: freezed == dateTime ? _self.dateTime : dateTime // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,nextPrayerKey: freezed == nextPrayerKey ? _self.nextPrayerKey : nextPrayerKey // ignore: cast_nullable_to_non_nullable
+as String?,nextPrayerTime: freezed == nextPrayerTime ? _self.nextPrayerTime : nextPrayerTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,timeUntilNext: freezed == timeUntilNext ? _self.timeUntilNext : timeUntilNext // ignore: cast_nullable_to_non_nullable
+as Duration?,
   ));
 }
 

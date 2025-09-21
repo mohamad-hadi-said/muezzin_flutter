@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
+import 'package:muezzin_flutter/core/utils/extensions.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
 
@@ -89,9 +90,19 @@ class _HeaderCard extends StatelessWidget {
     final now = DateTime.now();
     final clock = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
     final timings = state.prayerTimes?.timings;
-    final meta = state.prayerTimes?.meta;
     final date = state.prayerTimes?.date;
-    final tz = meta?.timezone ?? '';
+
+    bool isNext(String key) => state.nextPrayerKey == key;
+
+    String? remainingTextFor(String key) {
+      if (!isNext(key)) return null;
+      final d = state.timeUntilNext;
+      if (d == null) return null;
+      final totalSeconds = d.inSeconds;
+      final hours = (totalSeconds ~/ 3600).toString().padLeft(2, '0');
+      final minutes = ((totalSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
+      return 'متبقي: $hours:$minutes';
+    }
 
     return Container(
       margin: const EdgeInsets.only(top: 8, bottom: 16),
@@ -114,8 +125,8 @@ class _HeaderCard extends StatelessWidget {
       child: Column(
         children: [
           Row(
-            children: const [
-              _RoundIcon(icon: Icons.settings_outlined),
+            children: [
+              _RoundIcon(icon: Icons.arrow_back_ios_new_rounded, onTap: () => Navigator.pop(context)),
               Expanded(child: Center(child: _TitleWithIcon())),
               _RoundIcon(icon: Icons.menu_rounded),
             ],
@@ -173,37 +184,49 @@ class _HeaderCard extends StatelessWidget {
           // Prayer tiles
           _PrayerTile(
             name: 'الفجر',
-            timeText: timings?.fajr ?? '--:--',
+            timeText: timings?.fajr?.fromIsoTime() ?? '--:--',
+            isNext: isNext('fajr'),
+            subtitle: remainingTextFor('fajr'),
             icon: Icons.wb_twilight,
           ),
           const SizedBox(height: 12),
           _PrayerTile(
             name: 'الشروق',
-            timeText: timings?.sunrise ?? '--:--',
+            timeText: timings?.sunrise?.fromIsoTime() ?? '--:--',
+            isNext: isNext('sunrise'),
+            subtitle: remainingTextFor('sunrise'),
             icon: Icons.wb_sunny,
           ),
           const SizedBox(height: 12),
           _PrayerTile(
             name: 'الظهر',
-            timeText: timings?.dhuhr ?? '--:--',
+            timeText: timings?.dhuhr?.fromIsoTime() ?? '--:--',
+            isNext: isNext('dhuhr'),
+            subtitle: remainingTextFor('dhuhr'),
             icon: Icons.wb_sunny_outlined,
           ),
           const SizedBox(height: 12),
           _PrayerTile(
             name: 'العصر',
-            timeText: timings?.asr ?? '--:--',
+            timeText: timings?.asr?.fromIsoTime() ?? '--:--',
+            isNext: isNext('asr'),
+            subtitle: remainingTextFor('asr'),
             icon: Icons.location_city_outlined,
           ),
           const SizedBox(height: 12),
           _PrayerTile(
             name: 'المغرب',
-            timeText: timings?.maghrib ?? '--:--',
+            timeText: timings?.maghrib?.fromIsoTime() ?? '--:--',
+            isNext: isNext('maghrib'),
+            subtitle: remainingTextFor('maghrib'),
             icon: Icons.nightlight,
           ),
           const SizedBox(height: 12),
           _PrayerTile(
             name: 'العشاء',
-            timeText: timings?.isha ?? '--:--',
+            timeText: timings?.isha?.fromIsoTime() ?? '--:--',
+            isNext: isNext('isha'),
+            subtitle: remainingTextFor('isha'),
             icon: Icons.nightlight_round,
           ),
         ],
@@ -214,18 +237,23 @@ class _HeaderCard extends StatelessWidget {
 
 class _RoundIcon extends StatelessWidget {
   final IconData icon;
-  const _RoundIcon({required this.icon});
+  final VoidCallback? onTap;
+  const _RoundIcon({required this.icon, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: MuezzinTheme.onPrimary.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: MuezzinTheme.onPrimary.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(icon, color: MuezzinTheme.onPrimary),
       ),
-      child: Icon(icon, color: MuezzinTheme.onPrimary),
     );
   }
 }
@@ -338,84 +366,66 @@ class _PrayerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: MuezzinTheme.onPrimary.withOpacity(0.25),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: MuezzinTheme.onPrimary.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(18),
+        border:isNext ? Border.all(width: 1.5, color: MuezzinTheme.goldColor.withValues(alpha: 0.5)) : null,
+      ),
+      child: Row(
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Right side: label + icon square
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: MuezzinTheme.onPrimary.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: MuezzinTheme.onPrimary),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: MuezzinTheme.onPrimary.withOpacity(0.25),
-                      borderRadius: BorderRadius.circular(12),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: MuezzinTheme.onPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
                     ),
-                    child: Icon(icon, color: MuezzinTheme.onPrimary),
                   ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        name,
-                        style: const TextStyle(
-                          color: MuezzinTheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
+                  if (isNext && subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(
+                        color: MuezzinTheme.goldColor.withValues(alpha: 0.9),
+                        fontSize: 12,
                       ),
-                      if (isNext && subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle!,
-                          style: TextStyle(
-                            color: MuezzinTheme.onPrimary.withOpacity(0.9),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ],
               ),
-              const Spacer(),
-              // Left side: time
-              Text(
-                timeText,
-                style: const TextStyle(
-                  color: MuezzinTheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              
             ],
           ),
-        ),
-        if (isNext)
-          Positioned(
-            right: 6,
-            top: 8,
-            bottom: 8,
-            child: Container(
-              width: 6,
-              decoration: BoxDecoration(
-                color: MuezzinTheme.goldColor.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(16),
-              ),
+          const Spacer(),
+          // Left side: time
+          Text(
+            timeText,
+            style: const TextStyle(
+              color: MuezzinTheme.onPrimary,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

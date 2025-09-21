@@ -11,6 +11,12 @@ abstract class MuezzinState with _$MuezzinState {
     String? errorMessage,
     PrayerTimesData? prayerTimes,
     DateTime? dateTime,
+    // Key of the next prayer among: fajr, sunrise, dhuhr, asr, maghrib, isha
+    String? nextPrayerKey,
+    // Exact next prayer time in local timezone
+    DateTime? nextPrayerTime,
+    // Remaining duration until next prayer
+    Duration? timeUntilNext,
   }) = _MuezzinState;
 
 }

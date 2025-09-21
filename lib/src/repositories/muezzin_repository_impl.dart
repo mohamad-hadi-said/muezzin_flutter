@@ -16,6 +16,7 @@ abstract class MuezzinRepository {
     required double longitude,
     int method = 3,
     String? timezone,
+    bool iso8601 = false,
   });
   
   
@@ -36,6 +37,7 @@ class MuezzinRepositoryImpl implements MuezzinRepository {
     required double longitude,
     int method = 3,
     String? timezone,
+    bool iso8601 = false,
   }) async {
     try {
       final connectivityResults = await connectivity.checkConnectivity();
@@ -48,6 +50,7 @@ class MuezzinRepositoryImpl implements MuezzinRepository {
         longitude: longitude,
         method: method,
         timezone: timezone,
+        iso8601: iso8601,
       );
       return Right(data);
     } on ServerException catch (e) {
