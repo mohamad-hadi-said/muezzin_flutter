@@ -1,4 +1,6 @@
 // ignore_for_file: unused_element
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
@@ -15,14 +17,21 @@ class MuezzinScreen extends StatefulWidget {
 
 class _MuezzinScreenState extends State<MuezzinScreen> {
   MuezzinBloc bloc = MuezzinBloc();
+  final ValueNotifier<DateTime> _now = ValueNotifier<DateTime>(DateTime.now());
+  Timer? _clockTimer;
   @override
   void initState() {
     super.initState();
     bloc.add(LoadMuezzin());
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _now.value = DateTime.now();
+    });
   }
 
   @override
   void dispose() {
+    _clockTimer?.cancel();
+    _now.dispose();
     bloc.close();
     super.dispose();
   }
@@ -55,7 +64,7 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
                   horizontal: 16,
                   vertical: 12,
                 ),
-                child: _PrayerTimesContent(state: state),
+                child: _PrayerTimesContent(state: state, nowListenable: _now),
               ),
             ),
             bottomNavigationBar: const _BottomActionsBar(),
@@ -69,26 +78,25 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
 // ======================== Prayer Times UI ========================
 class _PrayerTimesContent extends StatelessWidget {
   final MuezzinState state;
-  const _PrayerTimesContent({required this.state});
+  final ValueListenable<DateTime> nowListenable;
+  const _PrayerTimesContent({required this.state, required this.nowListenable});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [_HeaderCard(state: state)],
+      children: [_HeaderCard(state: state, nowListenable: nowListenable)],
     );
   }
 }
 
 class _HeaderCard extends StatelessWidget {
   final MuezzinState state;
-  const _HeaderCard({required this.state});
+  final ValueListenable<DateTime> nowListenable;
+  const _HeaderCard({required this.state, required this.nowListenable});
 
   @override
   Widget build(BuildContext context) {
-    // We compute the clock here to ensure fresh time per build
-    final now = DateTime.now();
-    final clock = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
     final timings = state.prayerTimes?.timings;
     final date = state.prayerTimes?.date;
 
@@ -150,17 +158,23 @@ class _HeaderCard extends StatelessWidget {
             ],
           ), */
           const SizedBox(height: 24),
-          // Big digital clock
-          Text(
-            clock,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: MuezzinTheme.onPrimary,
-              fontSize: 46,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 4,
-              height: 1.0,
-            ),
+          // Big digital clock (updates every second via ValueListenable)
+          ValueListenableBuilder<DateTime>(
+            valueListenable: nowListenable,
+            builder: (context, now, _) {
+              final clock = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+              return Text(
+                clock,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: MuezzinTheme.onPrimary,
+                  fontSize: 46,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 4,
+                  height: 1.0,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 24),
           Row(

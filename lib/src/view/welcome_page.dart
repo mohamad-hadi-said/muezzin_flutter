@@ -62,7 +62,7 @@ class _WelcomePageState extends State<WelcomePage> {
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
             title: Text(
-              'أذكاري حيالتي',
+              'مواقيتي',
               style: TextStyle(
                 color: MuezzinTheme.textPrimary,
                 fontSize: 20,
