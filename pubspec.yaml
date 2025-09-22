@@ -53,6 +53,7 @@ dependencies:
   toastification: ^3.0.2
   dio: ^5.7.0
   intl: ^0.20.2
+  geolocator: ^14.0.2
 
 dev_dependencies:
   build_runner: any

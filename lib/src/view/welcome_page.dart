@@ -70,94 +70,70 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
           ),
-          leading: IconButton(
-            icon: Icon(Icons.search, color: MuezzinTheme.textPrimary),
-            onPressed: () {},
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(
-                Icons.dark_mode_outlined,
-                color: MuezzinTheme.textPrimary,
-              ),
-              onPressed: () {},
-            ),
-          ],
         ),
         body: SafeArea(
-          child: Stack(
-            children: [
-              const Positioned.fill(child: DiamondBackground()),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 8),
-                      // Muezzin Cards
-                      _buildMuezzinCard(
-                        title: 'أذكار الصباح',
-                        subtitle: 'بعد صلاة الفجر حتى شروق الشمس',
-                        image: 'assets/images/morning.png',
-                        icon: Icons.wb_sunny,
-                        onTap: () => _navigateToMuezzin(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  // Muezzin Cards
+                  ElevatedButton(onPressed: _navigateToMuezzin, child: Text('الدخول الى مواقيتي')),
+          
+                  const SizedBox(height: 32),
+          
+                  // Stats Section
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: MuezzinTheme.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-
-                      const SizedBox(height: 32),
-
-                      // Stats Section
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: MuezzinTheme.cardColor,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                      child: Column(
+                        children: [
+                          Text(
+                            'إحصائيات',
+                            style: TextStyle(
+                              color: MuezzinTheme.primaryColor,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                          child: Column(
+                          const SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              Text(
-                                'إحصائيات',
-                                style: TextStyle(
-                                  color: MuezzinTheme.primaryColor,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              _buildStatItem(
+                                '${AppCache.instance.getTimesPlayed()}',
+                                'مرات القراءة',
                               ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildStatItem(
-                                    '${AppCache.instance.getTimesPlayed()}',
-                                    'مرات القراءة',
-                                  ),
-                                  _buildStatItem(
-                                    "${AppCache.instance.getAdPoints()}",
-                                    'النقاط',
-                                  ),
-                                  _buildStatItem(
-                                    '$_remainingAdsToday',
-                                    'إعلانات اليوم',
-                                  ),
-                                ],
+                              _buildStatItem(
+                                "${AppCache.instance.getAdPoints()}",
+                                'النقاط',
+                              ),
+                              _buildStatItem(
+                                '$_remainingAdsToday',
+                                'إعلانات اليوم',
                               ),
                             ],
                           ),
-                        ),
-                       
-                    ],
-                  ),
-                ),
+                        ],
+                      ),
+                    ),
+                   
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

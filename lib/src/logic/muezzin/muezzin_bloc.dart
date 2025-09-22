@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
 import 'package:muezzin_flutter/injection_container.dart';
 import 'package:muezzin_flutter/src/repositories/muezzin_repository_impl.dart';
@@ -25,10 +26,13 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
     Emitter<MuezzinState> emit,
   ) async {
     emit(state.copyWith(loading: true, error: false));
+    final userLocation = AppCache.instance.getUserLocation();
+    final latitude = userLocation?.latitude ?? 36.478616;
+    final longitude = userLocation?.longitude ?? 37.100935;
     final prayerTimes = await muezzinRepository.getPrayerTimesByDate(
       date: _formatDateDDMMYYYY(DateTime.now()),
-      latitude: 36.478616,
-      longitude: 37.100935,
+      latitude: latitude,
+      longitude: longitude,
       iso8601: true,
     );
     prayerTimes.fold(
@@ -40,12 +44,14 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
         ),
       ),
       (data) {
-        emit(state.copyWith(
-          loading: false,
-          error: false,
-          prayerTimes: data,
-          dateTime: DateTime.now(),
-        ));
+        emit(
+          state.copyWith(
+            loading: false,
+            error: false,
+            prayerTimes: data,
+            dateTime: DateTime.now(),
+          ),
+        );
         // After loading, compute next prayer
         calculateNextPrayerTime();
       },
@@ -105,11 +111,13 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
 
     if (next?.value != null) {
       final remaining = next!.value!.difference(now);
-      emit(state.copyWith(
-        nextPrayerKey: next.key,
-        nextPrayerTime: next.value,
-        timeUntilNext: remaining.isNegative ? Duration.zero : remaining,
-      ));
+      emit(
+        state.copyWith(
+          nextPrayerKey: next.key,
+          nextPrayerTime: next.value,
+          timeUntilNext: remaining.isNegative ? Duration.zero : remaining,
+        ),
+      );
     }
   }
 }

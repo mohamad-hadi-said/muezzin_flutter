@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +21,7 @@ class AppCache {
   // Daily ad tracking
   static const String _adDailyCountKey = 'ad_daily_count';
   static const String _adDailyDateKey = 'ad_daily_date';
+  static const String _userLocationKey = 'user_location';
 
   // Singleton instance
   static final AppCache _instance = AppCache._internal();
@@ -215,6 +217,26 @@ class AppCache {
     } catch (e) {
       debugPrint('Error decoding prayer times: $e');
       return [];
+    }
+  }
+
+    /// Save user location to the cache
+  Future<bool> saveUserLocation(Position position) async {
+    _checkInitialized();
+    return await _prefs.setString(_userLocationKey, jsonEncode(position.toJson()));
+  }
+
+  /// Get user location from the cache
+  Position? getUserLocation() {
+    _checkInitialized();
+    final positionString = _prefs.getString(_userLocationKey);
+    if (positionString == null) return null;
+    
+    try {
+      return Position.fromMap(jsonDecode(positionString));
+    } catch (e) {
+      debugPrint('Error decoding user location: $e');
+      return null;
     }
   }
 

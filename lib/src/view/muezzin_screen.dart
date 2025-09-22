@@ -7,6 +7,7 @@ import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/extensions.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
+import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
 
 class MuezzinScreen extends StatefulWidget {
   const MuezzinScreen({super.key});
@@ -38,39 +39,42 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MuezzinBloc, MuezzinState>(
-      bloc: bloc,
-      builder: (context, state) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Scaffold(
-            appBar: null,
-            body: Container(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height,
-              ),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    MuezzinTheme.gradientTop,
-                    MuezzinTheme.gradientBottom,
-                  ],
+    return BlocProvider(
+      create: (context) => bloc,
+      child: BlocBuilder<MuezzinBloc, MuezzinState>(
+        bloc: bloc,
+        builder: (context, state) {
+          return Directionality(
+            textDirection: TextDirection.rtl,
+            child: Scaffold(
+              appBar: null,
+              body: Container(
+                constraints: BoxConstraints(
+                  minHeight: MediaQuery.of(context).size.height,
+                ),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      MuezzinTheme.gradientTop,
+                      MuezzinTheme.gradientBottom,
+                    ],
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  child: _PrayerTimesContent(state: state, nowListenable: _now),
                 ),
               ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: _PrayerTimesContent(state: state, nowListenable: _now),
-              ),
+              bottomNavigationBar: const _BottomActionsBar(),
             ),
-            bottomNavigationBar: const _BottomActionsBar(),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -109,7 +113,7 @@ class _HeaderCard extends StatelessWidget {
       final totalSeconds = d.inSeconds;
       final hours = (totalSeconds ~/ 3600).toString().padLeft(2, '0');
       final minutes = ((totalSeconds % 3600) ~/ 60).toString().padLeft(2, '0');
-      return 'متبقي: $hours:$minutes';
+      return 'بعد $hours ساعة و $minutes دقيقة';
     }
 
     return Container(
@@ -134,7 +138,10 @@ class _HeaderCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              _RoundIcon(icon: Icons.arrow_back_ios_new_rounded, onTap: () => Navigator.pop(context)),
+              _RoundIcon(
+                icon: Icons.arrow_back_ios_new_rounded,
+                onTap: () => Navigator.pop(context),
+              ),
               Expanded(child: Center(child: _TitleWithIcon())),
               _RoundIcon(icon: Icons.menu_rounded),
             ],
@@ -162,7 +169,8 @@ class _HeaderCard extends StatelessWidget {
           ValueListenableBuilder<DateTime>(
             valueListenable: nowListenable,
             builder: (context, now, _) {
-              final clock = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+              final clock =
+                  '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
               return Text(
                 clock,
                 textAlign: TextAlign.center,
@@ -386,7 +394,12 @@ class _PrayerTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: MuezzinTheme.onPrimary.withValues(alpha: 0.25),
         borderRadius: BorderRadius.circular(18),
-        border:isNext ? Border.all(width: 1.5, color: MuezzinTheme.goldColor.withValues(alpha: 0.5)) : null,
+        border: isNext
+            ? Border.all(
+                width: 1.5,
+                color: MuezzinTheme.goldColor.withValues(alpha: 0.5),
+              )
+            : null,
       ),
       child: Row(
         children: [
@@ -449,18 +462,21 @@ class _BottomActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget item(IconData icon, String label) {
+    Widget item(IconData icon, String label, {VoidCallback? onTap}) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: MuezzinTheme.onPrimary.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(16),
+          InkWell(
+            onTap: onTap,
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: MuezzinTheme.onPrimary.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(icon, color: MuezzinTheme.onPrimary),
             ),
-            child: Icon(icon, color: MuezzinTheme.onPrimary),
           ),
           const SizedBox(height: 6),
           Text(
@@ -485,16 +501,27 @@ class _BottomActionsBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            item(Icons.explore_outlined, 'القبلة'),
-            item(Icons.timer_outlined, 'العد التنازلي'),
-            item(Icons.place_outlined, 'الموقع'),
+            item(Icons.explore_outlined, 'القبلة', onTap: () {}),
+            item(Icons.timer_outlined, 'العد التنازلي', onTap: () {}),
+            item(
+              Icons.place_outlined,
+              'الموقع',
+              onTap: () async {
+                final result = await showDialog<bool?>(
+                  context: context,
+                  builder: (context) => const GetCurrentLocation(),
+                );
+                if (result != null && result) {
+                  context.read<MuezzinBloc>().add(LoadMuezzin());
+                }
+              },
+            ),
           ],
         ),
       ),
     );
   }
 }
-
 
 // Combines the card and the repeat bar with a slight overlap like the screenshot
 class _CardWithRepeat extends StatelessWidget {
