@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/extensions.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
@@ -20,10 +21,27 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
   MuezzinBloc bloc = MuezzinBloc();
   final ValueNotifier<DateTime> _now = ValueNotifier<DateTime>(DateTime.now());
   Timer? _clockTimer;
+
+  Future<void> _selectUserLocation() async {
+    final userLocation = AppCache.instance.getUserLocation();
+    if (userLocation != null) {
+      return;
+    }
+
+    final result = await showDialog<bool?>(
+      context: context,
+      builder: (context) => const GetCurrentLocation(),
+    );
+    if (result != null && result) {
+      bloc.add(LoadMuezzin());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     bloc.add(LoadMuezzin());
+    _selectUserLocation();
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _now.value = DateTime.now();
     });

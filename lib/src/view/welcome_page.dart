@@ -3,7 +3,6 @@ import 'package:muezzin_flutter/core/utils/toast.dart';
 import 'package:muezzin_flutter/src/logic/home/home_bloc.dart';
 import 'package:muezzin_flutter/src/logic/home/home_state.dart';
 import 'package:muezzin_flutter/src/view/muezzin_screen.dart';
-import 'package:muezzin_flutter/src/view/widgets/dimond_background.dart';
 import 'package:flutter/material.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,85 +53,142 @@ class _WelcomePageState extends State<WelcomePage> {
         }
       },
       child: Scaffold(
-        backgroundColor: MuezzinTheme.backgroundColor,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          surfaceTintColor: Colors.transparent,
-          flexibleSpace: FlexibleSpaceBar(
-            centerTitle: true,
-            title: Text(
-              'مواقيتي',
-              style: TextStyle(
-                color: MuezzinTheme.textPrimary,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+        appBar: null,
+        body: Container(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height,
+          ),
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                MuezzinTheme.gradientTop,
+                MuezzinTheme.gradientBottom,
+              ],
             ),
           ),
-        ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  // Muezzin Cards
-                  ElevatedButton(onPressed: _navigateToMuezzin, child: Text('الدخول الى مواقيتي')),
-          
-                  const SizedBox(height: 32),
-          
-                  // Stats Section
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: MuezzinTheme.cardColor,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 50),
+                // Header-like card matching Muezzin screen
+                Container(
+                  margin: const EdgeInsets.only(top: 8, bottom: 16),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [MuezzinTheme.gradientTop, MuezzinTheme.secondaryColor],
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'إحصائيات',
-                            style: TextStyle(
-                              color: MuezzinTheme.primaryColor,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        children: const [
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                'مواقيتي',
+                                style: TextStyle(
+                                  color: MuezzinTheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildStatItem(
-                                '${AppCache.instance.getTimesPlayed()}',
-                                'مرات القراءة',
-                              ),
-                              _buildStatItem(
-                                "${AppCache.instance.getAdPoints()}",
-                                'النقاط',
-                              ),
-                              _buildStatItem(
-                                '$_remainingAdsToday',
-                                'إعلانات اليوم',
-                              ),
-                            ],
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        'مرحبًا بك! يمكنك الدخول إلى شاشة المواقيت لمعرفة مواقيت الصلاة في منطقتك.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: MuezzinTheme.onPrimary.withOpacity(0.95),
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: MuezzinTheme.primaryColor,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: _navigateToMuezzin,
+                          child: const Text('الدخول إلى المواقيت'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+      
+                // Stats Section styled like cards
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: MuezzinTheme.cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'إحصائيات',
+                        style: TextStyle(
+                          color: MuezzinTheme.primaryColor,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildStatItem(
+                            '${AppCache.instance.getTimesPlayed()}',
+                            'مرات القراءة',
+                          ),
+                          _buildStatItem(
+                            "${AppCache.instance.getAdPoints()}",
+                            'النقاط',
+                          ),
+                          _buildStatItem(
+                            '$_remainingAdsToday',
+                            'إعلانات اليوم',
                           ),
                         ],
                       ),
-                    ),
-                   
-                ],
-              ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),
