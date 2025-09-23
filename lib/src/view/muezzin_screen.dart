@@ -193,7 +193,7 @@ class _HeaderCard extends StatelessWidget {
                 clock,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: MuezzinTheme.onPrimary,
+                  color: MuezzinTheme.textPrimary,
                   fontSize: 46,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 4,
@@ -292,7 +292,7 @@ class _RoundIcon extends StatelessWidget {
           color: MuezzinTheme.onPrimary.withOpacity(0.25),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: MuezzinTheme.onPrimary),
+        child: Icon(icon, color: MuezzinTheme.goldColor),
       ),
     );
   }
@@ -310,13 +310,13 @@ class _TitleWithIcon extends StatelessWidget {
         Text(
           'مواقيت الصلاة',
           style: TextStyle(
-            color: MuezzinTheme.onPrimary,
+            color: MuezzinTheme.textSecondary,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         SizedBox(width: 6),
-        Icon(Icons.alarm, color: MuezzinTheme.onPrimary, size: 18),
+        Icon(Icons.alarm, color: MuezzinTheme.textSecondary, size: 18),
       ],
     );
   }
@@ -337,7 +337,7 @@ class _InfoChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: MuezzinTheme.onPrimary, size: 18),
+          Icon(icon, color: MuezzinTheme.goldColor, size: 18),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -345,7 +345,7 @@ class _InfoChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: MuezzinTheme.onPrimary,
+                color: MuezzinTheme.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -371,7 +371,7 @@ class _DateChip extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(icon, color: MuezzinTheme.onPrimary, size: 18),
+          Icon(icon, color: MuezzinTheme.goldColor, size: 18),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -379,7 +379,7 @@ class _DateChip extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                color: MuezzinTheme.onPrimary,
+                color: MuezzinTheme.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -431,7 +431,7 @@ class _PrayerTile extends StatelessWidget {
                   color: MuezzinTheme.onPrimary.withValues(alpha: 0.25),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: MuezzinTheme.onPrimary),
+                child: Icon(icon, color: MuezzinTheme.goldColor),
               ),
               const SizedBox(width: 12),
               Column(
@@ -440,7 +440,7 @@ class _PrayerTile extends StatelessWidget {
                   Text(
                     name,
                     style: const TextStyle(
-                      color: MuezzinTheme.onPrimary,
+                      color: MuezzinTheme.textSecondary,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
@@ -464,7 +464,7 @@ class _PrayerTile extends StatelessWidget {
           Text(
             timeText,
             style: const TextStyle(
-              color: MuezzinTheme.onPrimary,
+              color: MuezzinTheme.textSecondary,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             ),
@@ -493,13 +493,13 @@ class _BottomActionsBar extends StatelessWidget {
                 color: MuezzinTheme.onPrimary.withOpacity(0.25),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(icon, color: MuezzinTheme.onPrimary),
+              child: Icon(icon, color: MuezzinTheme.goldColor),
             ),
           ),
           const SizedBox(height: 6),
           Text(
             label,
-            style: const TextStyle(color: MuezzinTheme.onPrimary, fontSize: 12),
+            style: const TextStyle(color: MuezzinTheme.textSecondary, fontSize: 12),
           ),
         ],
       );
@@ -536,228 +536,6 @@ class _BottomActionsBar extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// Combines the card and the repeat bar with a slight overlap like the screenshot
-class _CardWithRepeat extends StatelessWidget {
-  final String text;
-  final int count;
-  final int max;
-  final VoidCallback onMinus;
-  final VoidCallback onPlus;
-  final VoidCallback onReset;
-  const _CardWithRepeat({
-    required this.text,
-    required this.count,
-    required this.max,
-    required this.onMinus,
-    required this.onPlus,
-    required this.onReset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _DhikrCard(text: text),
-        const SizedBox(height: 8),
-        _RepeatBar(
-          count: count,
-          max: max,
-          onMinus: onMinus,
-          onPlus: onPlus,
-          onReset: onReset,
-        ),
-      ],
-    );
-  }
-}
-
-class _DhikrCard extends StatelessWidget {
-  final String text;
-  const _DhikrCard({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    final cardColor = Colors.white;
-    return PhysicalModel(
-      color: cardColor,
-      elevation: 6,
-      shadowColor: Colors.black12,
-      borderRadius: BorderRadius.circular(18),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-          color: cardColor,
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              height: 1.7,
-              fontWeight: FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RepeatBar extends StatelessWidget {
-  final int count;
-  final int max;
-  final VoidCallback onMinus;
-  final VoidCallback onPlus;
-  final VoidCallback onReset;
-  const _RepeatBar({
-    required this.count,
-    required this.max,
-    required this.onMinus,
-    required this.onPlus,
-    required this.onReset,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final barColor = Colors.white;
-    return PhysicalModel(
-      color: barColor,
-      elevation: 3,
-      shadowColor: Colors.black12,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: barColor,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Text(
-                  'التكرار',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
-                ),
-                const SizedBox(width: 8),
-                _MiniCounter(count: count, onMinus: onMinus, onPlus: onPlus),
-              ],
-            ),
-            _ResetButton(onReset: onReset),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ResetButton extends StatelessWidget {
-  const _ResetButton({required this.onReset});
-
-  final VoidCallback onReset;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
-          onTap: onReset,
-          borderRadius: BorderRadius.circular(12),
-          child: SizedBox(
-            width: 36,
-            height: 32,
-            child: Icon(Icons.refresh, size: 18),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressBar extends StatelessWidget {
-  final double value;
-  const _ProgressBar({required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(999),
-      child: LinearProgressIndicator(
-        value: value.clamp(0.0, 1.0),
-        minHeight: 6,
-        backgroundColor: Colors.black.withOpacity(0.06),
-      ),
-    );
-  }
-}
-
-// Mini counter chip: [-  count  +]
-class _MiniCounter extends StatelessWidget {
-  final int count;
-  final VoidCallback onMinus;
-  final VoidCallback onPlus;
-  const _MiniCounter({
-    required this.count,
-    required this.onMinus,
-    required this.onPlus,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _CapsuleButton(icon: Icons.add, onTap: onPlus),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Text(
-              '$count',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ),
-          _CapsuleButton(icon: Icons.remove, onTap: onMinus),
-        ],
-      ),
-    );
-  }
-}
-
-class _CapsuleButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _CapsuleButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: SizedBox(width: 36, height: 32, child: Icon(icon, size: 18)),
       ),
     );
   }
