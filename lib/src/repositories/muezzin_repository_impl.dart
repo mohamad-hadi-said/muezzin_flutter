@@ -19,6 +19,16 @@ abstract class MuezzinRepository {
     bool iso8601 = false,
   });
   
+  /// Fetch prayer times for a specific date and location using Aladhan API
+  Future<Either<Failure, List<PrayerTimesData>>> getPrayerTimesForMonth({
+    required int year,
+    required int month,
+    required double latitude,
+    required double longitude,
+    int method = 3,
+    String? timezone,
+    bool iso8601 = false,
+  });
   
 }
 
@@ -59,4 +69,30 @@ class MuezzinRepositoryImpl implements MuezzinRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+  
+  @override
+  Future<Either<Failure, List<PrayerTimesData>>> getPrayerTimesForMonth({required int year, required int month, required double latitude, required double longitude, int method = 3, String? timezone, bool iso8601 = false}) async {
+    try {
+      final connectivityResults = await connectivity.checkConnectivity();
+      if (connectivityResults.isEmpty || connectivityResults.first == ConnectivityResult.none) {
+        return Left(ServerFailure('لا يوجد اتصال بالانترنت'));
+      }
+      final data = await remoteDataSource.getPrayerTimesForMonth(
+        year: year,
+        month: month,
+        latitude: latitude,
+        longitude: longitude,
+        method: method,
+        timezone: timezone,
+        iso8601: iso8601,
+      );
+      return Right(data);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  
 }

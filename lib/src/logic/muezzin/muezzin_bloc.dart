@@ -2,9 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
-import 'package:muezzin_flutter/injection_container.dart';
-import 'package:muezzin_flutter/src/repositories/muezzin_repository_impl.dart';
-import 'package:muezzin_flutter/core/services/notification_service.dart';
+import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 
 part 'muezzin_event.dart';
 
@@ -12,54 +10,49 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
   MuezzinBloc() : super(MuezzinState()) {
     on<LoadMuezzin>(_onLoadMuezzin);
   }
-
-  final muezzinRepository = sl<MuezzinRepository>();
-
-  String _formatDateDDMMYYYY(DateTime d) {
-    final dd = d.day.toString().padLeft(2, '0');
-    final mm = d.month.toString().padLeft(2, '0');
-    final yyyy = d.year.toString();
-    return '$dd-$mm-$yyyy';
-  }
-
   Future<void> _onLoadMuezzin(
     LoadMuezzin event,
     Emitter<MuezzinState> emit,
   ) async {
     emit(state.copyWith(loading: true, error: false));
-    final userLocation = AppCache.instance.getUserLocation();
-    final latitude = userLocation?.latitude ?? 36.478616;
-    final longitude = userLocation?.longitude ?? 37.100935;
-    final prayerTimes = await muezzinRepository.getPrayerTimesByDate(
-      date: _formatDateDDMMYYYY(DateTime.now()),
-      latitude: latitude,
-      longitude: longitude,
-      iso8601: true,
-    );
-    prayerTimes.fold(
-      (l) => emit(
+
+    final prayerTimes = getPrayerTimesForToday();
+
+    if(prayerTimes == null) {
+      emit(
         state.copyWith(
           loading: false,
           error: true,
-          errorMessage: 'خطأ في تحميل الأذكار: ${l.message}',
+          errorMessage: 'خطأ في تحميل الأذكار: لا يوجد بيانات',
         ),
+      );
+    }
+
+    emit(
+      state.copyWith(
+        loading: false,
+        error: false,
+        prayerTimes: prayerTimes,
+        dateTime: DateTime.now(),
       ),
-      (data) {
-        emit(
-          state.copyWith(
-            loading: false,
-            error: false,
-            prayerTimes: data,
-            dateTime: DateTime.now(),
-          ),
-        );
-        // After loading, compute next prayer
-        calculateNextPrayerTime();
-        // Schedule notifications for upcoming prayers today
-        NotificationService.cancelAllScheduled();
-        NotificationService.scheduleToday(data.timings);
-      },
     );
+    // After loading, compute next prayer
+    calculateNextPrayerTime();
+  }
+
+  PrayerTimesData? getPrayerTimesForToday() {
+    final getPrayerTimesForThisMonth = AppCache.instance.getPrayerTimes();
+
+    if (getPrayerTimesForThisMonth.isEmpty) {
+      return null;
+    }
+
+    final todayPrayerTimes = getPrayerTimesForThisMonth.firstWhere(
+      (element) =>
+          element.date?.gregorian?.day == DateTime.now().day.toString(),
+    );
+
+    return todayPrayerTimes;
   }
 
   calculateNextPrayerTime() {

@@ -58,6 +58,7 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
         _position = position;
       });
       await AppCache().saveUserLocation(position);
+      await AppCache().saveMonthOfPrayerTimes(-1);
       if (mounted) {
         Navigator.pop(context, true);
       }

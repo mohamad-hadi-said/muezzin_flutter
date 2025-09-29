@@ -13,6 +13,16 @@ abstract class MuezzinRemoteDataSource {
     String? timezone,
     bool iso8601 = false,
   });
+
+  Future<List<PrayerTimesData>> getPrayerTimesForMonth({
+    required int year, 
+    required int month, 
+    required double latitude,
+    required double longitude,
+    int method = 3,
+    String? timezone,
+    bool iso8601 = false,
+  });
 }
 
 class MuezzinRemoteDataSourceImpl implements MuezzinRemoteDataSource {
@@ -49,6 +59,34 @@ class MuezzinRemoteDataSourceImpl implements MuezzinRemoteDataSource {
       }
 
       final parsed = PrayerTimesResponse.fromJson(data);
+      dev.log('Prayer times fetched with status: ${parsed.status}');
+      return parsed.data!;
+    } catch (e) {
+      dev.log('Error fetching prayer times: $e');
+      throw ServerException(e.toString());
+    }
+  }
+  
+  @override
+  Future<List<PrayerTimesData>> getPrayerTimesForMonth({required int year, required int month, required double latitude, required double longitude, int method = 3, String? timezone, bool iso8601 = false}) async {
+    try {
+      final response = await _dio.get(
+        '/calendar/$year/$month',
+        queryParameters: {
+          'latitude': latitude,
+          'longitude': longitude,
+          'method': method,
+          if (timezone != null) 'timezonestring': timezone,
+          'iso8601': iso8601,
+        },
+      );
+
+      final data = response.data;
+      if (data is! Map<String, dynamic>) {
+        throw ServerException('Unexpected response type');
+      }
+
+      final parsed = PrayerTimesListResponse.fromJson(data);
       dev.log('Prayer times fetched with status: ${parsed.status}');
       return parsed.data!;
     } catch (e) {

@@ -22,6 +22,7 @@ class AppCache {
   static const String _adDailyCountKey = 'ad_daily_count';
   static const String _adDailyDateKey = 'ad_daily_date';
   static const String _userLocationKey = 'user_location';
+  static const String _monthPrayerTimesKey = 'month_prayer_times';
 
   // Singleton instance
   static final AppCache _instance = AppCache._internal();
@@ -204,7 +205,7 @@ class AppCache {
 
   Future<bool> savePrayerTimes(List<PrayerTimesData> prayerTimes) async {
     _checkInitialized();
-    return await _prefs.setStringList(_prayerTimesKey, prayerTimes.map((question) =>jsonEncode(question.toJson())).toList());
+    return await _prefs.setStringList(_prayerTimesKey, prayerTimes.map((e) =>jsonEncode(e.toJson())).toList());
   }
 
   List<PrayerTimesData> getPrayerTimes() {
@@ -213,7 +214,7 @@ class AppCache {
     if (prayerTimesStringList == null) return [];
     
     try {
-      return prayerTimesStringList.map((questionString) => PrayerTimesData.fromJson(jsonDecode(questionString))).toList();
+      return prayerTimesStringList.map((e) => PrayerTimesData.fromJson(jsonDecode(e))).toList();
     } catch (e) {
       debugPrint('Error decoding prayer times: $e');
       return [];
@@ -238,6 +239,16 @@ class AppCache {
       debugPrint('Error decoding user location: $e');
       return null;
     }
+  }
+
+  Future<bool> saveMonthOfPrayerTimes(int month) async {
+    _checkInitialized();
+    return await _prefs.setInt(_monthPrayerTimesKey, month);
+  }
+
+  int getMonthOfPrayerTimes() {
+    _checkInitialized();
+    return _prefs.getInt(_monthPrayerTimesKey) ?? 0;
   }
 
   /// Save login status to the cache

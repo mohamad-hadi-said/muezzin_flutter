@@ -23,6 +23,24 @@ Map<String, dynamic> _$PrayerTimesResponseToJson(
   'data': instance.data,
 };
 
+PrayerTimesListResponse _$PrayerTimesListResponseFromJson(
+  Map<String, dynamic> json,
+) => PrayerTimesListResponse(
+  code: (json['code'] as num?)?.toInt(),
+  status: json['status'] as String?,
+  data: (json['data'] as List<dynamic>?)
+      ?.map((e) => PrayerTimesData.fromJson(e as Map<String, dynamic>))
+      .toList(),
+);
+
+Map<String, dynamic> _$PrayerTimesListResponseToJson(
+  PrayerTimesListResponse instance,
+) => <String, dynamic>{
+  'code': instance.code,
+  'status': instance.status,
+  'data': instance.data,
+};
+
 PrayerTimesData _$PrayerTimesDataFromJson(Map<String, dynamic> json) =>
     PrayerTimesData(
       timings: json['timings'] == null

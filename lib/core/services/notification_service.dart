@@ -9,8 +9,7 @@ class NotificationService {
 
   static Future<void> initialize() async {
     await AwesomeNotifications().initialize(
-      // null => Default app icon
-      null,
+      'resource://mipmap/ic_launcher',
       [
         NotificationChannel(
           channelKey: _channelKey,
@@ -42,7 +41,7 @@ class NotificationService {
     } catch (_) {}
   }
 
-  static Future<void> sendTestNotification() async {
+  /* static Future<void> sendTestNotification() async {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 999999,
@@ -50,22 +49,25 @@ class NotificationService {
         title: 'اختبار الإشعار',
         body: 'هذا إشعار تجريبي للتحقق من صوت الأذان',
         notificationLayout: NotificationLayout.BigText,
-        category: NotificationCategory.Reminder,
+        category: NotificationCategory.Alarm,
         wakeUpScreen: true,
+        fullScreenIntent: true,
+        criticalAlert: true,
         autoDismissible: true,
         badge: 1,
         color: MuezzinTheme.primaryColor,
       ),
     );
-  }
+  } */
 
   static int _idFor(DateTime dt, int idx) =>
       ((dt.year * 10000) + (dt.month * 100) + dt.day) * 10 + idx;
 
-  static Future<void> scheduleToday(PrayerTimings? timings) async {
-    if (timings == null) return;
+  static Future<void> scheduleToThisMonth(List<PrayerTimesData> monthData) async {
+    if (monthData.isEmpty) return;
 
     final now = DateTime.now();
+    int scheduledCount = 0;
 
     DateTime? _parseLocal(String? iso) {
       if (iso == null) return null;
@@ -76,14 +78,6 @@ class NotificationService {
       }
     }
 
-    final entries = <MapEntry<String, DateTime?>>[
-      MapEntry('fajr', _parseLocal(timings.fajr)),
-      MapEntry('dhuhr', _parseLocal(timings.dhuhr)),
-      MapEntry('asr', _parseLocal(timings.asr)),
-      MapEntry('maghrib', _parseLocal(timings.maghrib ?? timings.sunset)),
-      MapEntry('isha', _parseLocal(timings.isha)),
-    ];
-
     const namesAr = {
       'fajr': 'الفجر',
       'dhuhr': 'الظهر',
@@ -92,99 +86,69 @@ class NotificationService {
       'isha': 'العشاء',
     };
 
-    // Schedule upcoming prayers only
-    int idx = 0;
-    int scheduledCount = 0;
-    for (final e in entries) {
-      final dt = e.value;
-      if (dt == null) {
-        idx++;
-        continue;
-      }
-      if (dt.isAfter(now)) {
-        final id = _idFor(dt, idx);
-        await AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: id,
-            channelKey: _channelKey,
-            title: 'حان الآن وقت صلاة ${namesAr[e.key] ?? ''}',
-            body: 'دخل وقت الصلاة الآن. نسأل الله القبول.',
-            notificationLayout: NotificationLayout.BigText,
-            category: NotificationCategory.Reminder,
-            wakeUpScreen: true,
-            autoDismissible: true,
-            badge: 1,
-            color: MuezzinTheme.primaryColor,
-          ),
-          actionButtons: [
-            NotificationActionButton(
-              key: 'OPEN_MUEZZIN',
-              label: 'فتح المواقيت',
-            ),
-          ],
-          schedule: NotificationCalendar(
-            year: dt.year,
-            month: dt.month,
-            day: dt.day,
-            hour: dt.hour,
-            minute: dt.minute,
-            second: 0,
-            millisecond: 0,
-            preciseAlarm: true,
-            allowWhileIdle: true,
-          ),
-        );
-        scheduledCount++;
-      }
-      idx++;
-    }
+    // Loop through each day in the month
+    for (final dayData in monthData) {
+      final timings = dayData.timings;
+      if (timings == null) continue;
 
-    // If all prayers have passed today, schedule tomorrow's Fajr using today's time-of-day
-    if (scheduledCount == 0) {
-      final fajr = entries.first.value;
-      if (fajr != null) {
-        final tomorrowFajr = DateTime(
-          now.year,
-          now.month,
-          now.day,
-          fajr.hour,
-          fajr.minute,
-        ).add(const Duration(days: 1));
-        final id = _idFor(tomorrowFajr, 0);
-        await AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: id,
-            channelKey: _channelKey,
-            title: 'حان الآن وقت صلاة ${namesAr['fajr']}',
-            body: 'دخل وقت الصلاة الآن. نسأل الله القبول.',
-            notificationLayout: NotificationLayout.BigText,
-            category: NotificationCategory.Reminder,
-            wakeUpScreen: true,
-            autoDismissible: true,
-            badge: 1,
-            // smallIcon: 'resource://mipmap/ic_launcher',
-            color: MuezzinTheme.primaryColor,
-          ),
-          actionButtons: [
-            NotificationActionButton(
-              key: 'OPEN_MUEZZIN',
-              label: 'فتح المواقيت',
-              // buttonType: ActionButtonType.Default,
+      final entries = <MapEntry<String, DateTime?>>[
+        MapEntry('fajr', _parseLocal(timings.fajr)),
+        MapEntry('dhuhr', _parseLocal(timings.dhuhr)),
+        MapEntry('asr', _parseLocal(timings.asr)),
+        MapEntry('maghrib', _parseLocal(timings.maghrib ?? timings.sunset)),
+        MapEntry('isha', _parseLocal(timings.isha)),
+      ];
+
+      // Schedule each prayer for this day if it's in the future
+      int idx = 0;
+      for (final e in entries) {
+        final dt = e.value;
+        if (dt == null) {
+          idx++;
+          continue;
+        }
+
+        // Only schedule if the prayer time is in the future
+        if (dt.isAfter(now)) {
+          final id = _idFor(dt, idx);
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: id,
+              channelKey: _channelKey,
+              title: 'حان الآن وقت صلاة ${namesAr[e.key] ?? ''}',
+              body: 'دخل وقت الصلاة الآن. نسأل الله القبول.',
+              notificationLayout: NotificationLayout.BigText,
+              category: NotificationCategory.Alarm,
+              wakeUpScreen: true,
+              fullScreenIntent: true,
+              criticalAlert: true,
+              autoDismissible: true,
+              badge: 1,
+              color: MuezzinTheme.primaryColor,
             ),
-          ],
-          schedule: NotificationCalendar(
-            year: tomorrowFajr.year,
-            month: tomorrowFajr.month,
-            day: tomorrowFajr.day,
-            hour: tomorrowFajr.hour,
-            minute: tomorrowFajr.minute,
-            second: 0,
-            millisecond: 0,
-            preciseAlarm: true,
-            allowWhileIdle: true,
-          ),
-        );
+            actionButtons: [
+              NotificationActionButton(
+                key: 'OPEN_MUEZZIN',
+                label: 'فتح المواقيت',
+              ),
+            ],
+            schedule: NotificationCalendar(
+              year: dt.year,
+              month: dt.month,
+              day: dt.day,
+              hour: dt.hour,
+              minute: dt.minute,
+              second: 0,
+              millisecond: 0,
+              preciseAlarm: true,
+              allowWhileIdle: true,
+            ),
+          );
+          scheduledCount++;
+        }
+        idx++;
       }
     }
+    print('✅ Scheduled $scheduledCount prayer notifications for this month');
   }
 }

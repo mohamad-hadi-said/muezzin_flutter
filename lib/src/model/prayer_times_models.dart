@@ -15,6 +15,18 @@ class PrayerTimesResponse {
 }
 
 @JsonSerializable()
+class PrayerTimesListResponse {
+  int? code;
+  String? status;
+  List<PrayerTimesData>? data;
+  PrayerTimesListResponse({this.code, this.status, this.data});
+  Map<String, dynamic> toJson() => _$PrayerTimesListResponseToJson(this);
+
+  factory PrayerTimesListResponse.fromJson(Map<String, dynamic> json) =>
+      _$PrayerTimesListResponseFromJson(json);
+}
+
+@JsonSerializable()
 class PrayerTimesData {
   PrayerTimings? timings;
   DateInfo? date;

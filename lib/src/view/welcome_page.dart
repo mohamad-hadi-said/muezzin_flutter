@@ -7,6 +7,7 @@ import 'package:muezzin_flutter/src/view/muezzin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
 
 class WelcomePage extends StatefulWidget {
   const WelcomePage({Key? key}) : super(key: key);
@@ -139,16 +140,35 @@ class _WelcomePageState extends State<WelcomePage> {
                           child: const Text('الدخول إلى المواقيت'),
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: MuezzinTheme.primaryColor,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          onPressed: () async {
+                            final result = await showDialog<bool?>(
+                              context: context,
+                              builder: (context) => const GetCurrentLocation(),
+                            );
+                            if (result != null && result) {
+                              bloc.add(LoadHome());
+                            }
+                          },
+                          label: const Text('تحديد موقعي الحالي'),
+                          icon: const Icon(Icons.location_on),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-
-                ElevatedButton(onPressed: (){
-                  NotificationService.sendTestNotification().then((value){
-                    Toast.success(context, 'تم إرسال الاشعار');
-                  });
-                }, child: Text('اخبتار الاشعارات')),
-      
                 // Stats Section styled like cards
                 Container(
                   width: double.infinity,
