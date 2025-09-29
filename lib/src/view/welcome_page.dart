@@ -1,3 +1,4 @@
+import 'package:muezzin_flutter/core/services/notification_service.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/toast.dart';
 import 'package:muezzin_flutter/src/logic/home/home_bloc.dart';
@@ -141,6 +142,12 @@ class _WelcomePageState extends State<WelcomePage> {
                     ],
                   ),
                 ),
+
+                ElevatedButton(onPressed: (){
+                  NotificationService.sendTestNotification().then((value){
+                    Toast.success(context, 'تم إرسال الاشعار');
+                  });
+                }, child: Text('اخبتار الاشعارات')),
       
                 // Stats Section styled like cards
                 Container(

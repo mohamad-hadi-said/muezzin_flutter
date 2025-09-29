@@ -4,8 +4,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/services/ad_mob_service.dart';
 import 'package:muezzin_flutter/core/theme/app_text_theme.dart';
-import 'core/services/supabase_service.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:muezzin_flutter/core/services/notification_service.dart';
 import 'src/view/welcome_page.dart';
+import 'src/view/muezzin_screen.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
@@ -30,8 +32,26 @@ Future<void> main() async {
     // Initialize AdMob
     AdMobService.initialize();
 
+    // Initialize and request permission for local notifications
+    await NotificationService.initialize();
+    await NotificationService.ensurePermission();
+
+
     // Run the app
     runApp(const MyApp());
+
+    // If the app was launched by tapping on a notification while it was terminated,
+    // handle the initial action and navigate to MuezzinScreen.
+    final initialAction = await AwesomeNotifications()
+        .getInitialNotificationAction(removeFromActionEvents: true);
+    if (initialAction != null) {
+      final navigator = MyApp.navigatorKey.currentState;
+      if (navigator != null) {
+        navigator.push(
+          MaterialPageRoute(builder: (_) => const MuezzinScreen()),
+        );
+      }
+    }
   } catch (e) {
     // Handle initialization errors
     runApp(

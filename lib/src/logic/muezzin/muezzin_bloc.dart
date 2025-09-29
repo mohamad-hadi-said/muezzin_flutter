@@ -4,6 +4,7 @@ import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
 import 'package:muezzin_flutter/injection_container.dart';
 import 'package:muezzin_flutter/src/repositories/muezzin_repository_impl.dart';
+import 'package:muezzin_flutter/core/services/notification_service.dart';
 
 part 'muezzin_event.dart';
 
@@ -54,6 +55,9 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
         );
         // After loading, compute next prayer
         calculateNextPrayerTime();
+        // Schedule notifications for upcoming prayers today
+        NotificationService.cancelAllScheduled();
+        NotificationService.scheduleToday(data.timings);
       },
     );
   }
