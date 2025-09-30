@@ -9,7 +9,7 @@ class NotificationService {
 
   static Future<void> initialize() async {
     await AwesomeNotifications().initialize(
-      'resource://mipmap/ic_launcher',
+      null,//resource://mipmap/ic_launcher
       [
         NotificationChannel(
           channelKey: _channelKey,

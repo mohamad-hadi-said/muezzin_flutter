@@ -16,21 +16,19 @@ Future<void> main() async {
   try {
     await di.configureDependencies();
 
-    // Initialize Supabase
-    // SupabaseService();
 
     // Initialize AppCache
     await AppCache.initializeCache();
 
-    AdMobService.configure(
-      androidInterstitial: 'ca-app-pub-9647507547970609/4982116288',
-      androidRewardedInterstitial: 'ca-app-pub-9647507547970609/2164381257',
-      androidAppOpen: 'ca-app-pub-9647507547970609/9340179606',
-      androidNative: 'ca-app-pub-9647507547970609/4519081851',
-    );
+    // AdMobService.configure(
+    //   androidInterstitial: 'ca-app-pub-9647507547970609/4982116288',
+    //   androidRewardedInterstitial: 'ca-app-pub-9647507547970609/2164381257',
+    //   androidAppOpen: 'ca-app-pub-9647507547970609/9340179606',
+    //   androidNative: 'ca-app-pub-9647507547970609/4519081851',
+    // );
 
-    // Initialize AdMob
-    AdMobService.initialize();
+    // // Initialize AdMob
+    // AdMobService.initialize();
 
     // Initialize and request permission for local notifications
     await NotificationService.initialize();
@@ -186,7 +184,7 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       // Try to show App Open ad when user returns to the app
-      AdMobService.showAppOpenIfAvailable();
+      // AdMobService.showAppOpenIfAvailable();
     }
   }
 

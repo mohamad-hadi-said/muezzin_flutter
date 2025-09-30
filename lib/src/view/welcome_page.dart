@@ -170,7 +170,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   ),
                 ),
                 // Stats Section styled like cards
-                Container(
+                /* Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -214,7 +214,7 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                     ],
                   ),
-                ),
+                ), */
               ],
             ),
           ),

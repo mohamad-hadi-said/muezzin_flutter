@@ -37,7 +37,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_bloc: ^8.1.4
-  supabase_flutter: ^2.3.4
   uuid: ^4.2.2
   dartz: ^0.10.1
   get_it: ^7.6.7
@@ -49,7 +48,7 @@ dependencies:
   json_annotation: ^4.9.0
   json_serializable: ^6.9.5
   connectivity_plus: ^6.1.4
-  google_mobile_ads: ^6.0.0
+  # google_mobile_ads: ^6.0.0
   toastification: ^3.0.2
   dio: ^5.7.0
   intl: ^0.20.2
