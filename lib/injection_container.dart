@@ -18,6 +18,9 @@ Future<void> configureDependencies() async {
       final dio = Dio(
         BaseOptions(
           baseUrl: 'https://api.aladhan.com/v1',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -25,16 +28,16 @@ Future<void> configureDependencies() async {
         ),
       );
       dio.interceptors.add(
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        logPrint: (log) {
-          if (kDebugMode) {
-            dev.log(log.toString(),name: 'Dio');
-          }
-        },
-      ),
-    );
+        LogInterceptor(
+          requestBody: false,
+          responseBody: false,
+          logPrint: (log) {
+            if (kDebugMode) {
+              dev.log(log.toString(), name: 'Dio');
+            }
+          },
+        ),
+      );
       return dio;
     }
   );

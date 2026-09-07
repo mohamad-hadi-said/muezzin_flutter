@@ -23,11 +23,13 @@ class AppCache {
   static const String _adDailyDateKey = 'ad_daily_date';
   static const String _userLocationKey = 'user_location';
   static const String _monthPrayerTimesKey = 'month_prayer_times';
+  static const String _yearPrayerTimesKey = 'year_prayer_times';
 
   // Singleton instance
   static final AppCache _instance = AppCache._internal();
   late SharedPreferences _prefs;
   static bool _initialized = false;
+  List<PrayerTimesData>? _cachedPrayerTimes;
 
   /// Get the singleton instance of AppCache
   static AppCache get instance => _instance;
@@ -205,25 +207,37 @@ class AppCache {
 
   Future<bool> savePrayerTimes(List<PrayerTimesData> prayerTimes) async {
     _checkInitialized();
-    return await _prefs.setStringList(_prayerTimesKey, prayerTimes.map((e) =>jsonEncode(e.toJson())).toList());
+    _cachedPrayerTimes = prayerTimes;
+    return await _prefs.setStringList(
+      _prayerTimesKey,
+      prayerTimes.map((e) => jsonEncode(e.toJson())).toList(),
+    );
   }
 
   List<PrayerTimesData> getPrayerTimes() {
     _checkInitialized();
+    if (_cachedPrayerTimes != null && _cachedPrayerTimes!.isNotEmpty) {
+      return _cachedPrayerTimes!;
+    }
     final prayerTimesStringList = _prefs.getStringList(_prayerTimesKey);
     if (prayerTimesStringList == null) return [];
-    
+
     try {
-      return prayerTimesStringList.map((e) => PrayerTimesData.fromJson(jsonDecode(e))).toList();
+      final list = prayerTimesStringList
+          .map((e) => PrayerTimesData.fromJson(jsonDecode(e)))
+          .toList();
+      _cachedPrayerTimes = list;
+      return list;
     } catch (e) {
       debugPrint('Error decoding prayer times: $e');
       return [];
     }
   }
 
-    /// Save user location to the cache
+  /// Save user location to the cache
   Future<bool> saveUserLocation(Position position) async {
     _checkInitialized();
+    _cachedPrayerTimes = null;
     return await _prefs.setString(_userLocationKey, jsonEncode(position.toJson()));
   }
 
@@ -232,7 +246,7 @@ class AppCache {
     _checkInitialized();
     final positionString = _prefs.getString(_userLocationKey);
     if (positionString == null) return null;
-    
+
     try {
       return Position.fromMap(jsonDecode(positionString));
     } catch (e) {
@@ -243,12 +257,25 @@ class AppCache {
 
   Future<bool> saveMonthOfPrayerTimes(int month) async {
     _checkInitialized();
+    if (month == -1) {
+      _cachedPrayerTimes = null;
+    }
     return await _prefs.setInt(_monthPrayerTimesKey, month);
   }
 
   int getMonthOfPrayerTimes() {
     _checkInitialized();
     return _prefs.getInt(_monthPrayerTimesKey) ?? 0;
+  }
+
+  Future<bool> saveYearOfPrayerTimes(int year) async {
+    _checkInitialized();
+    return await _prefs.setInt(_yearPrayerTimesKey, year);
+  }
+
+  int getYearOfPrayerTimes() {
+    _checkInitialized();
+    return _prefs.getInt(_yearPrayerTimesKey) ?? 0;
   }
 
   /// Save login status to the cache
@@ -266,6 +293,7 @@ class AppCache {
   /// Clear all data from the cache
   Future<bool> clearAll() async {
     _checkInitialized();
+    _cachedPrayerTimes = null;
     return await _prefs.clear();
   }
 
@@ -327,6 +355,7 @@ class AppCache {
 
   Future<bool> clear() async {
     _checkInitialized();
+    _cachedPrayerTimes = null;
     return await _prefs.clear();
   }
 
