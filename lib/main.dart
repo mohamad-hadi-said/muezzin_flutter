@@ -2,7 +2,6 @@ import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
-import 'package:muezzin_flutter/core/services/ad_mob_service.dart';
 import 'package:muezzin_flutter/core/theme/app_text_theme.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:muezzin_flutter/core/services/notification_service.dart';
@@ -20,15 +19,6 @@ Future<void> main() async {
     // Initialize AppCache
     await AppCache.initializeCache();
 
-    // AdMobService.configure(
-    //   androidInterstitial: 'ca-app-pub-9647507547970609/4982116288',
-    //   androidRewardedInterstitial: 'ca-app-pub-9647507547970609/2164381257',
-    //   androidAppOpen: 'ca-app-pub-9647507547970609/9340179606',
-    //   androidNative: 'ca-app-pub-9647507547970609/4519081851',
-    // );
-
-    // // Initialize AdMob
-    // AdMobService.initialize();
 
     // Initialize and request permission for local notifications
     await NotificationService.initialize();
@@ -128,7 +118,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       navigatorKey: navigatorKey,
       debugShowCheckedModeBanner: false,
-      title: 'أذكاري حياتي',
+      title: 'Muezzin',
       theme: MuezzinTheme.lightTheme,
       darkTheme: MuezzinTheme.darkTheme,
       themeMode: ThemeMode.light,
@@ -178,14 +168,6 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      // Try to show App Open ad when user returns to the app
-      // AdMobService.showAppOpenIfAvailable();
-    }
   }
 
   @override
