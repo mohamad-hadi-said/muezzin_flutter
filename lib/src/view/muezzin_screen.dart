@@ -141,7 +141,7 @@ class _HeaderCard extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(top: 8, bottom: 16),
+      margin: const EdgeInsets.only(top: 32, bottom: 16),
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
