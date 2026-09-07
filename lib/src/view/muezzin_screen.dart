@@ -40,8 +40,14 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
   @override
   void initState() {
     super.initState();
-    bloc.add(LoadMuezzin());
-    _selectUserLocation();
+    final userLocation = AppCache.instance.getUserLocation();
+    if (userLocation != null) {
+      bloc.add(LoadMuezzin());
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _selectUserLocation();
+      });
+    }
     _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       _now.value = DateTime.now();
     });
@@ -529,7 +535,7 @@ class _BottomActionsBar extends StatelessWidget {
                   context: context,
                   builder: (context) => const GetCurrentLocation(),
                 );
-                if (result != null && result) {
+                if (result != null && result && context.mounted) {
                   context.read<MuezzinBloc>().add(LoadMuezzin());
                 }
               },

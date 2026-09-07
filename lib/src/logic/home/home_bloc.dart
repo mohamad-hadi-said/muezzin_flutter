@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/injection_container.dart';
 import 'package:muezzin_flutter/src/logic/home/home_state.dart';
@@ -20,20 +21,30 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     final userLocation = AppCache.instance.getUserLocation();
     final latitude = userLocation?.latitude ?? 36.478616;
     final longitude = userLocation?.longitude ?? 37.100935;
-    final month = DateTime.now().month;
-    if(AppCache.instance.getMonthOfPrayerTimes() == month) {
-      emit(
-        state.copyWith(
-          loading: false,
-          error: false,
-          prayerTimes: AppCache.instance.getPrayerTimes(),
-          dateTime: DateTime.now(),
-        ),
-      );
-      return;
+    final now = DateTime.now();
+    final month = now.month;
+    final year = now.year;
+
+    if (AppCache.instance.getMonthOfPrayerTimes() == month &&
+        AppCache.instance.getYearOfPrayerTimes() == year) {
+      final cachedTimes = AppCache.instance.getPrayerTimes();
+      if (cachedTimes.isNotEmpty) {
+        emit(
+          state.copyWith(
+            loading: false,
+            error: false,
+            prayerTimes: cachedTimes,
+            dateTime: now,
+          ),
+        );
+        // Refresh upcoming prayer notifications smoothly in the background
+        unawaited(NotificationService.scheduleUpcomingPrayers(cachedTimes));
+        return;
+      }
     }
+
     final prayerTimes = await muezzinRepository.getPrayerTimesForMonth(
-      year: DateTime.now().year,
+      year: year,
       month: month,
       latitude: latitude,
       longitude: longitude,
@@ -44,7 +55,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         state.copyWith(
           loading: false,
           error: true,
-          errorMessage: 'خطأ في تحميل الأذكار: ${l.message}',
+          errorMessage: 'خطأ في تحميل مواقيت الصلاة: ${l.message}',
         ),
       ),
       (data) {
@@ -57,10 +68,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           ),
         );
         AppCache.instance.saveMonthOfPrayerTimes(month);
+        AppCache.instance.saveYearOfPrayerTimes(year);
         AppCache.instance.savePrayerTimes(data);
-        // Schedule notifications for upcoming prayers this month
-        NotificationService.cancelAllScheduled();
-        NotificationService.scheduleToThisMonth(data);
+        // Schedule notifications for upcoming prayers (next 2-3 days) safely
+        unawaited(NotificationService.scheduleUpcomingPrayers(data));
       },
     );
   }

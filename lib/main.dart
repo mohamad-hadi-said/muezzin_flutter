@@ -20,13 +20,14 @@ Future<void> main() async {
     await AppCache.initializeCache();
 
 
-    // Initialize and request permission for local notifications
+    // Initialize local notifications
     await NotificationService.initialize();
-    await NotificationService.ensurePermission();
 
-
-    // Run the app
+    // Run the app immediately so the UI is displayed without delay
     runApp(const MyApp());
+
+    // Request permissions asynchronously without blocking the UI startup
+    NotificationService.ensurePermission();
 
     // If the app was launched by tapping on a notification while it was terminated,
     // handle the initial action and navigate to MuezzinScreen.
@@ -162,6 +163,16 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final cachedTimes = AppCache.instance.getPrayerTimes();
+      if (cachedTimes.isNotEmpty) {
+        NotificationService.scheduleUpcomingPrayers(cachedTimes);
+      }
+    }
   }
 
   @override

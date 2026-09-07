@@ -16,13 +16,16 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
   String? _error;
   Position? _position;
 
-  Future<void> _ensurePermission() async {
+  Future<bool> _ensurePermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
         Toast.error(context, 'خدمة الموقع غير مفعلة. الرجاء تفعيل GPS.');
+        setState(() {
+          _error = 'خدمة الموقع غير مفعلة. الرجاء تفعيل GPS.';
+        });
       }
-      return;
+      return false;
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
@@ -31,8 +34,11 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
       if (permission == LocationPermission.denied) {
         if (mounted) {
           Toast.error(context, 'تم رفض إذن الموقع.');
+          setState(() {
+            _error = 'تم رفض إذن الموقع.';
+          });
         }
-        return;
+        return false;
       }
     }
 
@@ -42,8 +48,14 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
           context,
           'تم رفض إذن الموقع نهائيًا. الرجاء السماح من إعدادات التطبيق.',
         );
+        setState(() {
+          _error = 'تم رفض إذن الموقع نهائيًا. الرجاء السماح من إعدادات التطبيق.';
+        });
       }
+      return false;
     }
+
+    return true;
   }
 
   Future<void> _getLocation() async {
@@ -52,8 +64,24 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
       _error = null;
     });
     try {
-      await _ensurePermission();
-      final position = await Geolocator.getCurrentPosition();
+      final hasPermission = await _ensurePermission();
+      if (!hasPermission) {
+        return;
+      }
+
+      // Try fast cached position first, fallback to quick medium-accuracy with timeout
+      Position? position;
+      try {
+        position = await Geolocator.getLastKnownPosition();
+      } catch (_) {}
+
+      position ??= await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.medium,
+          timeLimit: Duration(seconds: 8),
+        ),
+      );
+
       setState(() {
         _position = position;
       });
@@ -64,7 +92,10 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
       }
     } catch (e) {
       if (mounted) {
-        Toast.error(context, e.toString());
+        setState(() {
+          _error = 'تعذر تحديد الموقع، يرجى التأكد من تفعيل GPS والمحاولة مجددًا.';
+        });
+        Toast.error(context, 'تعذر تحديد الموقع: $e');
       }
     } finally {
       if (mounted) {

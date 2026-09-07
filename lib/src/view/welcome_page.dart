@@ -8,10 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
 
 class WelcomePage extends StatefulWidget {
-  const WelcomePage({Key? key}) : super(key: key);
+  const WelcomePage({super.key});
 
   @override
-  _WelcomePageState createState() => _WelcomePageState();
+  State<WelcomePage> createState() => _WelcomePageState();
 }
 
 class _WelcomePageState extends State<WelcomePage> {
@@ -23,7 +23,13 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   void initState() {
     super.initState();
-    bloc.add(LoadHome());
+    bloc.add(const LoadHome());
+  }
+
+  @override
+  void dispose() {
+    bloc.close();
+    super.dispose();
   }
 
   @override
@@ -167,39 +173,4 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 
-  Future<dynamic> showAboutOusDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('من نحن؟'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "شركة إيكونوميكس - ECONOMIX",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "منصة سورية مبتكرة تهدف إلى توفير فرص عمل حقيقية عبر الإنترنت، بما يتناسب مع ظروف الشباب السوري داخل البلاد.",
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "🎯 ماذا نقدم؟  ",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "- وظائف عن بعد في مجالات متنوعة (تسويق، إدخال بيانات، تصميم، دعم فني...)",
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            child: const Text('حسنا'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    );
-  }
 }
