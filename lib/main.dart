@@ -5,7 +5,6 @@ import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/app_text_theme.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:muezzin_flutter/core/services/notification_service.dart';
-import 'src/view/welcome_page.dart';
 import 'src/view/muezzin_screen.dart';
 import 'injection_container.dart' as di;
 
@@ -29,18 +28,9 @@ Future<void> main() async {
     // Request permissions asynchronously without blocking the UI startup
     NotificationService.ensurePermission();
 
-    // If the app was launched by tapping on a notification while it was terminated,
-    // handle the initial action and navigate to MuezzinScreen.
-    final initialAction = await AwesomeNotifications()
+    // Consume initial notification action if the app was launched via notification
+    await AwesomeNotifications()
         .getInitialNotificationAction(removeFromActionEvents: true);
-    if (initialAction != null) {
-      final navigator = MyApp.navigatorKey.currentState;
-      if (navigator != null) {
-        navigator.push(
-          MaterialPageRoute(builder: (_) => const MuezzinScreen()),
-        );
-      }
-    }
   } catch (e) {
     // Handle initialization errors
     runApp(
@@ -48,7 +38,7 @@ Future<void> main() async {
         theme: MuezzinTheme.lightTheme,
         darkTheme: MuezzinTheme.darkTheme,
         themeMode: ThemeMode.dark,
-        home: Scaffold(
+        home: Scaffold( 
           backgroundColor: MuezzinTheme.primaryBackground,
           body: Center(
             child: Padding(
@@ -133,7 +123,7 @@ class MyApp extends StatelessWidget {
         Locale('ar', ''), // Arabic
       ],
       locale: const Locale('ar', 'SY'),
-      home: const _AppLifecycleWrapper(child: WelcomePage()),
+      home: const _AppLifecycleWrapper(child: MuezzinScreen()),
       builder: (context, child) {
         return Directionality(
           textDirection: TextDirection.rtl,

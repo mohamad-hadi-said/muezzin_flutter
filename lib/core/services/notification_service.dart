@@ -4,11 +4,17 @@ import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 
 class NotificationService {
-  static const String _channelKey = 'prayer_channel_v2';
-  static const String _channelName = 'إشعارات مواقيت الصلاة';
-  static const String _channelDescription = 'تنبيهات دخول أوقات الصلوات الخمس';
+  static const String _channelKey = 'prayer_channel_v3';
+  static const String _channelName = 'إشعارات وتنبيهات مواقيت الصلاة';
+  static const String _channelDescription = 'تنبيهات دخول أوقات الصلوات الخمس مع الأذان';
 
   static Future<void> initialize() async {
+    // Attempt to remove legacy channel if present to clean up obsolete settings
+    try {
+      await AwesomeNotifications().removeChannel('prayer_channel_v2');
+      await AwesomeNotifications().removeChannel('prayer_channel');
+    } catch (_) {}
+
     await AwesomeNotifications().initialize(
       null, // resource://mipmap/ic_launcher
       [
@@ -18,11 +24,14 @@ class NotificationService {
           channelDescription: _channelDescription,
           defaultColor: MuezzinTheme.primaryColor,
           ledColor: MuezzinTheme.primaryColor,
-          importance: NotificationImportance.High,
+          importance: NotificationImportance.Max,
           playSound: true,
           soundSource: 'resource://raw/ahmad_alkordi',
+          defaultRingtoneType: DefaultRingtoneType.Alarm,
           enableVibration: true,
           channelShowBadge: true,
+          criticalAlerts: true,
+          defaultPrivacy: NotificationPrivacy.Public,
         ),
       ],
       debug: false,
@@ -35,7 +44,16 @@ class NotificationService {
     try {
       final isAllowed = await AwesomeNotifications().isNotificationAllowed();
       if (!isAllowed) {
-        return await AwesomeNotifications().requestPermissionToSendNotifications();
+        return await AwesomeNotifications().requestPermissionToSendNotifications(
+          channelKey: _channelKey,
+          permissions: const [
+            NotificationPermission.Alert,
+            NotificationPermission.Sound,
+            NotificationPermission.Badge,
+            NotificationPermission.Vibration,
+            NotificationPermission.Light,
+          ],
+        );
       }
       return true;
     } catch (e) {
@@ -123,6 +141,8 @@ class NotificationService {
                   notificationLayout: NotificationLayout.BigText,
                   category: NotificationCategory.Alarm,
                   wakeUpScreen: true,
+                  fullScreenIntent: true,
+                  criticalAlert: true,
                   autoDismissible: true,
                   badge: 1,
                   color: MuezzinTheme.primaryColor,

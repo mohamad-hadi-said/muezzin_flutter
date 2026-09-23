@@ -32,7 +32,7 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
       context: context,
       builder: (context) => const GetCurrentLocation(),
     );
-    if (result != null && result) {
+    if (result == true) {
       bloc.add(LoadMuezzin());
     }
   }
@@ -40,10 +40,8 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
   @override
   void initState() {
     super.initState();
-    final userLocation = AppCache.instance.getUserLocation();
-    if (userLocation != null) {
-      bloc.add(LoadMuezzin());
-    } else {
+    bloc.add(LoadMuezzin());
+    if (AppCache.instance.getUserLocation() == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _selectUserLocation();
       });
@@ -163,31 +161,27 @@ class _HeaderCard extends StatelessWidget {
           Row(
             children: [
               _RoundIcon(
-                icon: Icons.arrow_back_ios_new_rounded,
-                onTap: () => Navigator.pop(context),
+                icon: Navigator.canPop(context)
+                    ? Icons.arrow_back_ios_new_rounded
+                    : Icons.location_on_outlined,
+                onTap: () async {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    final result = await showDialog<bool?>(
+                      context: context,
+                      builder: (context) => const GetCurrentLocation(),
+                    );
+                    if (result == true) {
+                      context.read<MuezzinBloc>().add(LoadMuezzin());
+                    }
+                  }
+                },
               ),
               Expanded(child: Center(child: _TitleWithIcon())),
               _RoundIcon(icon: Icons.menu_rounded),
             ],
           ),
-          /* const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _InfoChip(
-                  icon: Icons.location_on_outlined,
-                  text: tz.isNotEmpty ? tz : '—',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _InfoChip(
-                  icon: Icons.place_outlined,
-                  text: '${meta?.latitude?.toStringAsFixed(3) ?? '--'}, ${meta?.longitude?.toStringAsFixed(3) ?? '--'}',
-                ),
-              ),
-            ],
-          ), */
           const SizedBox(height: 24),
           // Big digital clock (updates every second via ValueListenable)
           ValueListenableBuilder<DateTime>(

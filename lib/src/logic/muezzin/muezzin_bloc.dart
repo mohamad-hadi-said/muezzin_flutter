@@ -25,8 +25,14 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
 
     var prayerTimes = getPrayerTimesForToday();
 
-    // If cache is empty, fetch from repository as fallback
-    if (prayerTimes == null) {
+    // If cache has valid prayer times for this month, schedule notifications immediately
+    if (prayerTimes != null) {
+      final cachedTimes = AppCache.instance.getPrayerTimes();
+      if (cachedTimes.isNotEmpty) {
+        unawaited(NotificationService.scheduleUpcomingPrayers(cachedTimes));
+      }
+    } else {
+      // If cache is empty or for a different month, fetch from repository
       final userLocation = AppCache.instance.getUserLocation();
       final latitude = userLocation?.latitude ?? 36.478616;
       final longitude = userLocation?.longitude ?? 37.100935;
@@ -92,13 +98,19 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
   }
 
   PrayerTimesData? getPrayerTimesForToday() {
-    final prayerTimesForThisMonth = AppCache.instance.getPrayerTimes();
+    final now = DateTime.now();
 
+    // Verify cache is present and belongs to current month and year
+    if (AppCache.instance.getMonthOfPrayerTimes() != now.month ||
+        AppCache.instance.getYearOfPrayerTimes() != now.year) {
+      return null;
+    }
+
+    final prayerTimesForThisMonth = AppCache.instance.getPrayerTimes();
     if (prayerTimesForThisMonth.isEmpty) {
       return null;
     }
 
-    final now = DateTime.now();
     for (final element in prayerTimesForThisMonth) {
       final dayStr = element.date?.gregorian?.day;
       if (dayStr == null) continue;
