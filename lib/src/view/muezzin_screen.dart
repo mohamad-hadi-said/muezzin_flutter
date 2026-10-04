@@ -8,6 +8,7 @@ import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/extensions.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
+import 'package:muezzin_flutter/src/view/qibla_screen.dart';
 import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
 
 class MuezzinScreen extends StatefulWidget {
@@ -519,7 +520,15 @@ class _BottomActionsBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            item(Icons.explore_outlined, 'القبلة', onTap: () {}),
+            item(
+              Icons.explore_outlined,
+              'القبلة',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const QiblaScreen()),
+                );
+              },
+            ),
             item(Icons.timer_outlined, 'العد التنازلي', onTap: () {}),
             item(
               Icons.place_outlined,
