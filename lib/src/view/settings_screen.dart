@@ -4,6 +4,7 @@ import 'package:muezzin_flutter/core/services/prayer_alarm_service.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/location_helper.dart';
 import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
+import 'package:muezzin_flutter/src/view/widgets/liquid_glass.dart';
 
 class CalculationMethodOption {
   final int id;
@@ -371,7 +372,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _buildTopBar(),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
               children: [
                 // 1. الموقع الجغرافي
                 _buildSectionHeader(
@@ -886,19 +887,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildCard({required Widget child}) {
-    return Container(
+    return LiquidGlassContainer(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: MuezzinTheme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      borderRadius: BorderRadius.circular(22),
+      blur: 16,
       child: child,
     );
   }

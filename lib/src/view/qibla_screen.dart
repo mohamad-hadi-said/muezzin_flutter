@@ -8,6 +8,7 @@ import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/location_helper.dart';
 import 'package:muezzin_flutter/core/utils/qibla_calculator.dart';
+import 'package:muezzin_flutter/src/view/widgets/liquid_glass.dart';
 import 'package:muezzin_flutter/src/view/widgets/qibla_compass_painter.dart';
 
 class QiblaScreen extends StatefulWidget {
@@ -226,65 +227,56 @@ class _QiblaScreenState extends State<QiblaScreen>
     final isAligned = QiblaCalculator.isFacingQibla(_currentHeading, _qiblaBearing);
     final angleDiff = QiblaCalculator.getAngleDifference(_currentHeading, _qiblaBearing);
 
-    final content = SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [MuezzinTheme.gradientTop, MuezzinTheme.gradientBottom],
-          ),
-        ),
-        child: SafeArea(
-          top: !widget.isEmbedded,
-          bottom: false,
-          child: Column(
-            children: [
-              // Top Bar
-              _buildTopBar(context),
-      
-              // Content Body
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Column(
-                    children: [
-                      // Location & Kaaba Distance Card
-                      _buildInfoCard(),
-                      const SizedBox(height: 16),
-      
-                      // Status Alignment Banner
-                      _buildStatusBanner(isAligned, angleDiff),
-                      const SizedBox(height: 24),
-      
-                      // Compass Display Widget
-                      _buildCompassSection(compassDiameter, isAligned),
-                      const SizedBox(height: 24),
-      
-                      // Orientation Numbers Card
-                      _buildAngleMetricsCard(angleDiff),
-                      const SizedBox(height: 16),
-      
-                      // Calibration Tip Button
-                      _buildCalibrationTipCard(),
-                      const SizedBox(height: 16),
-                    ],
-                  ),
-                ),
+    final mainContent = SafeArea(
+      top: !widget.isEmbedded,
+      bottom: false,
+      child: Column(
+        children: [
+          // Top Bar
+          _buildTopBar(context),
+
+          // Content Body
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+              child: Column(
+                children: [
+                  // Location & Kaaba Distance Card
+                  _buildInfoCard(),
+                  const SizedBox(height: 16),
+
+                  // Status Alignment Banner
+                  _buildStatusBanner(isAligned, angleDiff),
+                  const SizedBox(height: 24),
+
+                  // Compass Display Widget
+                  _buildCompassSection(compassDiameter, isAligned),
+                  const SizedBox(height: 24),
+
+                  // Orientation Numbers Card
+                  _buildAngleMetricsCard(angleDiff),
+                  const SizedBox(height: 16),
+
+                  // Calibration Tip Button
+                  _buildCalibrationTipCard(),
+                  const SizedBox(height: 16),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
 
     if (widget.isEmbedded) {
-      return content;
+      return mainContent;
     }
 
     return Scaffold(
-      body: content,
+      body: LiquidBackground(
+        child: mainContent,
+      ),
     );
   }
 
@@ -337,19 +329,10 @@ class _QiblaScreenState extends State<QiblaScreen>
   }
 
   Widget _buildInfoCard() {
-    return Container(
+    return LiquidGlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: MuezzinTheme.cardColor,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      borderRadius: BorderRadius.circular(20),
+      blur: 16,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -570,19 +553,10 @@ class _QiblaScreenState extends State<QiblaScreen>
   }
 
   Widget _buildAngleMetricsCard(double angleDiff) {
-    return Container(
+    return LiquidGlassContainer(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      decoration: BoxDecoration(
-        color: MuezzinTheme.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      borderRadius: BorderRadius.circular(20),
+      blur: 16,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -615,34 +589,28 @@ class _QiblaScreenState extends State<QiblaScreen>
   }
 
   Widget _buildCalibrationTipCard() {
-    return InkWell(
+    return LiquidGlassContainer(
       onTap: _showCalibrationDialog,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: MuezzinTheme.cardColor.withValues(alpha: 0.75),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: MuezzinTheme.outlineColor.withValues(alpha: 0.6)),
-        ),
-        child: const Row(
-          children: [
-            Icon(Icons.info_outline_rounded, color: MuezzinTheme.primaryColor, size: 20),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'كيفية معايرة البوصلة لضمان الدقة العالية',
-                style: TextStyle(
-                  color: MuezzinTheme.textPrimary,
-                  fontSize: 12,
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w600,
-                ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      borderRadius: BorderRadius.circular(16),
+      blur: 16,
+      child: const Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: MuezzinTheme.primaryColor, size: 20),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'كيفية معايرة البوصلة لضمان الدقة العالية',
+              style: TextStyle(
+                color: MuezzinTheme.textPrimary,
+                fontSize: 12,
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w600,
               ),
             ),
-            Icon(Icons.arrow_forward_ios_rounded, size: 12, color: MuezzinTheme.textSecondary),
-          ],
-        ),
+          ),
+          Icon(Icons.arrow_forward_ios_rounded, size: 12, color: MuezzinTheme.textSecondary),
+        ],
       ),
     );
   }
