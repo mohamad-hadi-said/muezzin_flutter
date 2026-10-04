@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
+import 'package:muezzin_flutter/core/utils/location_helper.dart';
 import 'package:muezzin_flutter/core/utils/toast.dart';
 
 class GetCurrentLocation extends StatefulWidget {
@@ -82,13 +83,17 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
         ),
       );
 
-      setState(() {
-        _position = position;
-      });
       await AppCache().saveUserLocation(position);
+      await LocationHelper.resolveAndSaveCityName(position.latitude, position.longitude);
       await AppCache().saveMonthOfPrayerTimes(-1);
       if (mounted) {
-        Navigator.pop(context, true);
+        setState(() {
+          _position = position;
+        });
+        await Future.delayed(const Duration(milliseconds: 600));
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -106,9 +111,6 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
 
   @override
   Widget build(BuildContext context) {
-    final lat = _position?.latitude;
-    final lon = _position?.longitude;
-
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       child: Material(
@@ -239,7 +241,7 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
                         ],
                       ),
                     ],
-                    if (lat != null && lon != null) ...[
+                    if (_position != null) ...[
                       Container(
                         margin: const EdgeInsets.only(top: 8),
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -249,12 +251,12 @@ class _GetCurrentLocationState extends State<GetCurrentLocation> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.place, color: MuezzinTheme.onBackground, size: 18),
+                            const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'الموقع: ${lat.toStringAsFixed(6)}, ${lon.toStringAsFixed(6)}',
-                                style: const TextStyle(color: MuezzinTheme.onBackground, fontSize: 13),
+                                'تم تحديد الموقع: ${LocationHelper.getCachedCityName()}',
+                                style: const TextStyle(color: MuezzinTheme.onBackground, fontSize: 13, fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],

@@ -22,8 +22,12 @@ class AppCache {
   static const String _adDailyCountKey = 'ad_daily_count';
   static const String _adDailyDateKey = 'ad_daily_date';
   static const String _userLocationKey = 'user_location';
+  static const String _userCityNameKey = 'user_city_name';
   static const String _monthPrayerTimesKey = 'month_prayer_times';
   static const String _yearPrayerTimesKey = 'year_prayer_times';
+  static const String _calculationMethodKey = 'calculation_method';
+  static const String _notificationsEnabledKey = 'notifications_enabled';
+  static const String _prayerNotifPrefix = 'prayer_notif_';
 
   // Singleton instance
   static final AppCache _instance = AppCache._internal();
@@ -255,6 +259,18 @@ class AppCache {
     }
   }
 
+  /// Save human-readable city/region name
+  Future<bool> saveUserCityName(String cityName) async {
+    _checkInitialized();
+    return await _prefs.setString(_userCityNameKey, cityName);
+  }
+
+  /// Get cached city/region name
+  String? getUserCityName() {
+    _checkInitialized();
+    return _prefs.getString(_userCityNameKey);
+  }
+
   Future<bool> saveMonthOfPrayerTimes(int month) async {
     _checkInitialized();
     if (month == -1) {
@@ -276,6 +292,42 @@ class AppCache {
   int getYearOfPrayerTimes() {
     _checkInitialized();
     return _prefs.getInt(_yearPrayerTimesKey) ?? 0;
+  }
+
+  /// Get calculation method (default: 3 - Muslim World League)
+  int getCalculationMethod() {
+    _checkInitialized();
+    return _prefs.getInt(_calculationMethodKey) ?? 3;
+  }
+
+  /// Save calculation method
+  Future<bool> saveCalculationMethod(int method) async {
+    _checkInitialized();
+    return await _prefs.setInt(_calculationMethodKey, method);
+  }
+
+  /// Master notification toggle (default: true)
+  bool getNotificationsEnabled() {
+    _checkInitialized();
+    return _prefs.getBool(_notificationsEnabledKey) ?? true;
+  }
+
+  /// Save master notification toggle
+  Future<bool> saveNotificationsEnabled(bool enabled) async {
+    _checkInitialized();
+    return await _prefs.setBool(_notificationsEnabledKey, enabled);
+  }
+
+  /// Per-prayer notification toggle (default: true)
+  bool isPrayerNotificationEnabled(String prayerKey) {
+    _checkInitialized();
+    return _prefs.getBool('$_prayerNotifPrefix$prayerKey') ?? true;
+  }
+
+  /// Save per-prayer notification toggle
+  Future<bool> savePrayerNotificationEnabled(String prayerKey, bool enabled) async {
+    _checkInitialized();
+    return await _prefs.setBool('$_prayerNotifPrefix$prayerKey', enabled);
   }
 
   /// Save login status to the cache

@@ -43,6 +43,7 @@ class MuezzinBloc extends Bloc<MuezzinEvent, MuezzinState> {
         month: now.month,
         latitude: latitude,
         longitude: longitude,
+        method: AppCache.instance.getCalculationMethod(),
         iso8601: true,
       );
 

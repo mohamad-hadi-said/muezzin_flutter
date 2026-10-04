@@ -3,6 +3,7 @@ import 'package:alarm/alarm.dart';
 import 'package:alarm/utils/alarm_set.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/foundation.dart';
+import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 
 class PrayerAlarmService {
@@ -78,6 +79,11 @@ class PrayerAlarmService {
       // Clear previously scheduled alarms to avoid duplicates
       await Alarm.stopAll();
 
+      if (!AppCache.instance.getNotificationsEnabled()) {
+        debugPrint('Prayer alarms are disabled in settings');
+        return;
+      }
+
       final now = DateTime.now();
       final maxDate = DateTime(now.year, now.month, now.day + daysAhead, 23, 59, 59);
       int scheduledCount = 0;
@@ -107,6 +113,11 @@ class PrayerAlarmService {
         for (final e in entries) {
           final dt = e.value;
           if (dt == null) {
+            idx++;
+            continue;
+          }
+
+          if (!AppCache.instance.isPrayerNotificationEnabled(e.key)) {
             idx++;
             continue;
           }

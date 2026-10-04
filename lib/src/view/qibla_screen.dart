@@ -6,11 +6,13 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
+import 'package:muezzin_flutter/core/utils/location_helper.dart';
 import 'package:muezzin_flutter/core/utils/qibla_calculator.dart';
 import 'package:muezzin_flutter/src/view/widgets/qibla_compass_painter.dart';
 
 class QiblaScreen extends StatefulWidget {
-  const QiblaScreen({super.key});
+  final bool isEmbedded;
+  const QiblaScreen({super.key, this.isEmbedded = false});
 
   @override
   State<QiblaScreen> createState() => _QiblaScreenState();
@@ -23,7 +25,7 @@ class _QiblaScreenState extends State<QiblaScreen>
 
   double _userLat = 36.478616;
   double _userLng = 37.100935;
-  String _locationName = 'موقعك المسجل';
+  String _locationName = 'الموقع الحالي';
   bool _isLoadingLocation = false;
   bool _hasCompassSensor = true;
 
@@ -51,8 +53,8 @@ class _QiblaScreenState extends State<QiblaScreen>
     if (cached != null) {
       _userLat = cached.latitude;
       _userLng = cached.longitude;
-      _locationName = 'الموقع الحالي';
     }
+    _locationName = LocationHelper.getCachedCityName();
     _recalculateQibla();
   }
 
@@ -81,14 +83,15 @@ class _QiblaScreenState extends State<QiblaScreen>
         );
         _userLat = pos.latitude;
         _userLng = pos.longitude;
-        _locationName = 'موقع GPS مباشر';
+        final city = await LocationHelper.resolveAndSaveCityName(pos.latitude, pos.longitude);
+        _locationName = city;
         _recalculateQibla();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('تم تحديث إحداثيات الموقع بنجاح', textAlign: TextAlign.center),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text('تم تحديث الموقع: $city', textAlign: TextAlign.center),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -223,8 +226,8 @@ class _QiblaScreenState extends State<QiblaScreen>
     final isAligned = QiblaCalculator.isFacingQibla(_currentHeading, _qiblaBearing);
     final angleDiff = QiblaCalculator.getAngleDifference(_currentHeading, _qiblaBearing);
 
-    return Scaffold(
-      body: Container(
+    final content = SafeArea(
+      child: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -233,11 +236,13 @@ class _QiblaScreenState extends State<QiblaScreen>
           ),
         ),
         child: SafeArea(
+          top: !widget.isEmbedded,
+          bottom: false,
           child: Column(
             children: [
               // Top Bar
               _buildTopBar(context),
-
+      
               // Content Body
               Expanded(
                 child: SingleChildScrollView(
@@ -248,19 +253,19 @@ class _QiblaScreenState extends State<QiblaScreen>
                       // Location & Kaaba Distance Card
                       _buildInfoCard(),
                       const SizedBox(height: 16),
-
+      
                       // Status Alignment Banner
                       _buildStatusBanner(isAligned, angleDiff),
                       const SizedBox(height: 24),
-
+      
                       // Compass Display Widget
                       _buildCompassSection(compassDiameter, isAligned),
                       const SizedBox(height: 24),
-
+      
                       // Orientation Numbers Card
                       _buildAngleMetricsCard(angleDiff),
                       const SizedBox(height: 16),
-
+      
                       // Calibration Tip Button
                       _buildCalibrationTipCard(),
                       const SizedBox(height: 16),
@@ -273,6 +278,14 @@ class _QiblaScreenState extends State<QiblaScreen>
         ),
       ),
     );
+
+    if (widget.isEmbedded) {
+      return content;
+    }
+
+    return Scaffold(
+      body: content,
+    );
   }
 
   Widget _buildTopBar(BuildContext context) {
@@ -281,10 +294,17 @@ class _QiblaScreenState extends State<QiblaScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: MuezzinTheme.textPrimary),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          if (!widget.isEmbedded)
+            IconButton(
+              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: MuezzinTheme.textPrimary),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.help_outline_rounded, color: MuezzinTheme.textPrimary),
+              tooltip: 'معايرة البوصلة',
+              onPressed: _showCalibrationDialog,
+            ),
           const Row(
             children: [
               Icon(Icons.explore_rounded, color: MuezzinTheme.textPrimary, size: 24),

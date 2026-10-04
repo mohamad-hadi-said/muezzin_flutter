@@ -6,9 +6,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/core/utils/extensions.dart';
+import 'package:muezzin_flutter/core/utils/location_helper.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_bloc.dart';
 import 'package:muezzin_flutter/src/logic/muezzin/muezzin_state.dart';
 import 'package:muezzin_flutter/src/view/qibla_screen.dart';
+import 'package:muezzin_flutter/src/view/settings_screen.dart';
 import 'package:muezzin_flutter/src/view/widgets/get_current_location.dart';
 
 class MuezzinScreen extends StatefulWidget {
@@ -22,6 +24,15 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
   MuezzinBloc bloc = MuezzinBloc();
   final ValueNotifier<DateTime> _now = ValueNotifier<DateTime>(DateTime.now());
   Timer? _clockTimer;
+  int _selectedIndex = 0;
+
+  void _onTabSelected(int index) {
+    if (_selectedIndex != index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
 
   Future<void> _selectUserLocation() async {
     final userLocation = AppCache.instance.getUserLocation();
@@ -85,15 +96,31 @@ class _MuezzinScreenState extends State<MuezzinScreen> {
                     ],
                   ),
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: _PrayerTimesContent(state: state, nowListenable: _now),
+                child: IndexedStack(
+                  index: _selectedIndex,
+                  children: [
+                    SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: _PrayerTimesContent(state: state, nowListenable: _now),
+                    ),
+                    const QiblaScreen(isEmbedded: true),
+                    SettingsScreen(
+                      isEmbedded: true,
+                      onSettingsChanged: () {
+                        bloc.add(LoadMuezzin());
+                        setState(() {});
+                      },
+                    ),
+                  ],
                 ),
               ),
-              bottomNavigationBar: const _BottomActionsBar(),
+              bottomNavigationBar: _BottomActionsBar(
+                selectedIndex: _selectedIndex,
+                onTabSelected: _onTabSelected,
+              ),
             ),
           );
         },
@@ -183,7 +210,54 @@ class _HeaderCard extends StatelessWidget {
               _RoundIcon(icon: Icons.menu_rounded),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
+          // Region Name Badge
+          InkWell(
+            onTap: () async {
+              final result = await showDialog<bool?>(
+                context: context,
+                builder: (context) => const GetCurrentLocation(),
+              );
+              if (result == true) {
+                context.read<MuezzinBloc>().add(LoadMuezzin());
+              }
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: MuezzinTheme.onPrimary.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: MuezzinTheme.goldColor.withOpacity(0.35),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.place_rounded, color: MuezzinTheme.goldColor, size: 16),
+                  const SizedBox(width: 6),
+                  Text(
+                    LocationHelper.getCachedCityName(),
+                    style: const TextStyle(
+                      color: MuezzinTheme.textPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Cairo',
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: MuezzinTheme.textPrimary.withOpacity(0.7),
+                    size: 16,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           // Big digital clock (updates every second via ValueListenable)
           ValueListenableBuilder<DateTime>(
             valueListenable: nowListenable,
@@ -477,32 +551,61 @@ class _PrayerTile extends StatelessWidget {
 }
 
 class _BottomActionsBar extends StatelessWidget {
-  const _BottomActionsBar();
+  final int selectedIndex;
+  final ValueChanged<int> onTabSelected;
+
+  const _BottomActionsBar({
+    required this.selectedIndex,
+    required this.onTabSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Widget item(IconData icon, String label, {VoidCallback? onTap}) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            onTap: onTap,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: MuezzinTheme.onPrimary.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(16),
+    Widget item({
+      required int index,
+      required IconData icon,
+      required IconData activeIcon,
+      required String label,
+      required VoidCallback onTap,
+    }) {
+      final bool isActive = selectedIndex == index;
+      return InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isActive
+                ? MuezzinTheme.goldColor.withOpacity(0.2)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: isActive
+                ? Border.all(color: MuezzinTheme.goldColor.withOpacity(0.4), width: 1.2)
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                isActive ? activeIcon : icon,
+                color: isActive ? MuezzinTheme.goldColor : MuezzinTheme.textSecondary,
+                size: 26,
               ),
-              child: Icon(icon, color: MuezzinTheme.goldColor),
-            ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isActive ? MuezzinTheme.goldColor : MuezzinTheme.textSecondary,
+                  fontSize: 12,
+                  fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                  fontFamily: 'Cairo',
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(color: MuezzinTheme.textSecondary, fontSize: 12),
-          ),
-        ],
+        ),
       );
     }
 
@@ -513,35 +616,40 @@ class _BottomActionsBar extends StatelessWidget {
           end: Alignment.bottomCenter,
           colors: [MuezzinTheme.secondaryColor, MuezzinTheme.gradientBottom],
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
+        ],
       ),
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
       child: SafeArea(
         top: false,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             item(
-              Icons.explore_outlined,
-              'القبلة',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => const QiblaScreen()),
-                );
-              },
+              index: 0,
+              icon: Icons.access_time_rounded,
+              activeIcon: Icons.access_time_filled_rounded,
+              label: 'مواقيت الصلاة',
+              onTap: () => onTabSelected(0),
             ),
-            item(Icons.timer_outlined, 'العد التنازلي', onTap: () {}),
             item(
-              Icons.place_outlined,
-              'الموقع',
-              onTap: () async {
-                final result = await showDialog<bool?>(
-                  context: context,
-                  builder: (context) => const GetCurrentLocation(),
-                );
-                if (result != null && result && context.mounted) {
-                  context.read<MuezzinBloc>().add(LoadMuezzin());
-                }
-              },
+              index: 1,
+              icon: Icons.explore_outlined,
+              activeIcon: Icons.explore_rounded,
+              label: 'القبلة',
+              onTap: () => onTabSelected(1),
+            ),
+            item(
+              index: 2,
+              icon: Icons.settings_outlined,
+              activeIcon: Icons.settings_rounded,
+              label: 'الإعدادات',
+              onTap: () => onTabSelected(2),
             ),
           ],
         ),
