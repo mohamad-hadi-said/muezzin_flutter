@@ -228,7 +228,6 @@ class _QiblaScreenState extends State<QiblaScreen>
     final angleDiff = QiblaCalculator.getAngleDifference(_currentHeading, _qiblaBearing);
 
     final mainContent = SafeArea(
-      top: !widget.isEmbedded,
       bottom: false,
       child: Column(
         children: [
