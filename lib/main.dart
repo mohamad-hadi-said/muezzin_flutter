@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'package:alarm/alarm.dart';
+import 'package:alarm/utils/alarm_set.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -5,6 +8,8 @@ import 'package:muezzin_flutter/core/cache/app_cache.dart';
 import 'package:muezzin_flutter/core/theme/app_text_theme.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:muezzin_flutter/core/services/notification_service.dart';
+import 'package:muezzin_flutter/core/services/prayer_alarm_service.dart';
+import 'package:muezzin_flutter/src/view/widgets/azan_ringing_dialog.dart';
 import 'src/view/muezzin_screen.dart';
 import 'injection_container.dart' as di;
 
@@ -19,6 +24,9 @@ Future<void> main() async {
     await AppCache.initializeCache();
 
 
+    // Initialize Prayer Alarm Service for exact alarms, full audio & lock screen wake-up
+    await PrayerAlarmService.initialize();
+
     // Initialize local notifications
     await NotificationService.initialize();
 
@@ -26,6 +34,7 @@ Future<void> main() async {
     runApp(const MyApp());
 
     // Request permissions asynchronously without blocking the UI startup
+    PrayerAlarmService.checkAndRequestPermissions();
     NotificationService.ensurePermission();
 
     // Consume initial notification action if the app was launched via notification
@@ -149,10 +158,40 @@ class _AppLifecycleWrapper extends StatefulWidget {
 
 class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
     with WidgetsBindingObserver {
+  StreamSubscription<AlarmSet>? _ringingSubscription;
+  bool _isDialogShowing = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    // Listen to ringing alarms while the app is active
+    _ringingSubscription = PrayerAlarmService.ringingStream.listen((AlarmSet? alarmSet) {
+      if (alarmSet != null) {
+        _checkAndShowRingingDialog(alarmSet);
+      }
+    });
+
+    // Check immediately on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAndShowRingingDialog(Alarm.ringing.value);
+    });
+  }
+
+  void _checkAndShowRingingDialog(AlarmSet alarmSet) async {
+    if (alarmSet.alarms.isNotEmpty && !_isDialogShowing) {
+      final context = MyApp.navigatorKey.currentContext;
+      if (context != null) {
+        _isDialogShowing = true;
+        final ringingAlarm = alarmSet.alarms.first;
+        try {
+          await AzanRingingDialog.show(context, ringingAlarm);
+        } finally {
+          _isDialogShowing = false;
+        }
+      }
+    }
   }
 
   @override
@@ -162,11 +201,13 @@ class _AppLifecycleWrapperState extends State<_AppLifecycleWrapper>
       if (cachedTimes.isNotEmpty) {
         NotificationService.scheduleUpcomingPrayers(cachedTimes);
       }
+      _checkAndShowRingingDialog(Alarm.ringing.value);
     }
   }
 
   @override
   void dispose() {
+    _ringingSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

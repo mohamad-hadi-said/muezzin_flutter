@@ -1,18 +1,21 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/foundation.dart';
+import 'package:muezzin_flutter/core/services/prayer_alarm_service.dart';
 import 'package:muezzin_flutter/core/theme/muezzin_theme.dart';
 import 'package:muezzin_flutter/src/model/prayer_times_models.dart';
 
 class NotificationService {
-  static const String _channelKey = 'prayer_channel_v3';
-  static const String _channelName = 'إشعارات وتنبيهات مواقيت الصلاة';
-  static const String _channelDescription = 'تنبيهات دخول أوقات الصلوات الخمس مع الأذان';
+  static const String _channelKey = 'prayer_general_channel';
+  static const String _channelName = 'تنبيهات عامة لمواقيت الصلاة';
+  static const String _channelDescription = 'إشعارات وتذكيرات التطبيق';
 
   static Future<void> initialize() async {
-    // Attempt to remove legacy channel if present to clean up obsolete settings
+    // Attempt to remove legacy channels if present
     try {
+      await AwesomeNotifications().removeChannel('prayer_channel_v3');
       await AwesomeNotifications().removeChannel('prayer_channel_v2');
       await AwesomeNotifications().removeChannel('prayer_channel');
+      await cancelAllScheduled();
     } catch (_) {}
 
     await AwesomeNotifications().initialize(
@@ -24,21 +27,16 @@ class NotificationService {
           channelDescription: _channelDescription,
           defaultColor: MuezzinTheme.primaryColor,
           ledColor: MuezzinTheme.primaryColor,
-          importance: NotificationImportance.Max,
-          playSound: true,
-          soundSource: 'resource://raw/ahmad_alkordi',
-          defaultRingtoneType: DefaultRingtoneType.Alarm,
+          importance: NotificationImportance.High,
+          playSound: false,
           enableVibration: true,
           channelShowBadge: true,
-          criticalAlerts: true,
           defaultPrivacy: NotificationPrivacy.Public,
         ),
       ],
       debug: false,
     );
   }
-
-  static bool _isScheduling = false;
 
   static Future<bool> ensurePermission() async {
     try {
@@ -52,6 +50,8 @@ class NotificationService {
             NotificationPermission.Badge,
             NotificationPermission.Vibration,
             NotificationPermission.Light,
+            NotificationPermission.PreciseAlarms,
+            NotificationPermission.FullScreenIntent,
           ],
         );
       }
@@ -70,115 +70,16 @@ class NotificationService {
     }
   }
 
-  static int _idFor(DateTime dt, int idx) =>
-      ((dt.year * 10000) + (dt.month * 100) + dt.day) * 10 + idx;
-
-  /// Schedule upcoming prayers for today and the next [daysAhead] days (default 1 day = today + tomorrow).
-  /// This prevents UI freezes, adheres to OS notification quotas, and complies with Android policies.
+  /// Schedule upcoming prayers using PrayerAlarmService (ensuring full audio playback and lock screen wake-up)
   static Future<void> scheduleUpcomingPrayers(
     List<PrayerTimesData> monthData, {
     int daysAhead = 1,
   }) async {
-    if (monthData.isEmpty) return;
-    if (_isScheduling) return;
-    _isScheduling = true;
+    // Cancel legacy AwesomeNotifications schedules
+    await cancelAllScheduled();
 
-    try {
-      // Await cancellation with timeout first to prevent SQLite database lock
-      await cancelAllScheduled();
-
-      final now = DateTime.now();
-      final maxDate = DateTime(now.year, now.month, now.day + daysAhead, 23, 59, 59);
-      int scheduledCount = 0;
-
-      DateTime? parseLocal(String? iso) {
-        if (iso == null) return null;
-        try {
-          return DateTime.parse(iso).toLocal();
-        } catch (_) {
-          return null;
-        }
-      }
-
-      const namesAr = {
-        'fajr': 'الفجر',
-        'dhuhr': 'الظهر',
-        'asr': 'العصر',
-        'maghrib': 'المغرب',
-        'isha': 'العشاء',
-      };
-
-      for (final dayData in monthData) {
-        final timings = dayData.timings;
-        if (timings == null) continue;
-
-        final entries = <MapEntry<String, DateTime?>>[
-          MapEntry('fajr', parseLocal(timings.fajr)),
-          MapEntry('dhuhr', parseLocal(timings.dhuhr)),
-          MapEntry('asr', parseLocal(timings.asr)),
-          MapEntry('maghrib', parseLocal(timings.maghrib ?? timings.sunset)),
-          MapEntry('isha', parseLocal(timings.isha)),
-        ];
-
-        int idx = 0;
-        for (final e in entries) {
-          final dt = e.value;
-          if (dt == null) {
-            idx++;
-            continue;
-          }
-
-          // Only schedule if the prayer time is in the future AND within our target window
-          if (dt.isAfter(now) && dt.isBefore(maxDate)) {
-            final id = _idFor(dt, idx);
-            try {
-              await AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                  id: id,
-                  channelKey: _channelKey,
-                  title: 'حان الآن وقت صلاة ${namesAr[e.key] ?? ''}',
-                  body: 'دخل وقت الصلاة الآن. نسأل الله القبول.',
-                  notificationLayout: NotificationLayout.BigText,
-                  category: NotificationCategory.Alarm,
-                  wakeUpScreen: true,
-                  fullScreenIntent: true,
-                  criticalAlert: true,
-                  autoDismissible: true,
-                  badge: 1,
-                  color: MuezzinTheme.primaryColor,
-                ),
-                actionButtons: [
-                  NotificationActionButton(
-                    key: 'OPEN_MUEZZIN',
-                    label: 'فتح المواقيت',
-                  ),
-                ],
-                schedule: NotificationCalendar(
-                  year: dt.year,
-                  month: dt.month,
-                  day: dt.day,
-                  hour: dt.hour,
-                  minute: dt.minute,
-                  second: 0,
-                  millisecond: 0,
-                  preciseAlarm: true,
-                  allowWhileIdle: true,
-                ),
-              );
-              scheduledCount++;
-              // Yield briefly to ensure UI loop remains silky smooth
-              await Future.delayed(const Duration(milliseconds: 10));
-            } catch (e) {
-              debugPrint('Error scheduling notification: $e');
-            }
-          }
-          idx++;
-        }
-      }
-      debugPrint('✅ Scheduled $scheduledCount prayer notifications for upcoming days');
-    } finally {
-      _isScheduling = false;
-    }
+    // Delegate to PrayerAlarmService for native exact alarm clock, full audio & lock screen wake-up
+    await PrayerAlarmService.scheduleUpcomingPrayers(monthData, daysAhead: daysAhead);
   }
 
   /// Backward compatible alias
@@ -186,3 +87,4 @@ class NotificationService {
     await scheduleUpcomingPrayers(monthData);
   }
 }
+
